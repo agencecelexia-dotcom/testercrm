@@ -1,0 +1,22 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import { AuthProvider } from "@/components/providers/session-provider";
+
+export const metadata: Metadata = {
+  title: "Celexia | CRM B2B Premium",
+  description: "Celexia CRM — Plateforme de gestion commerciale B2B pour agences LSA",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="fr" className="dark">
+      <body className="font-body antialiased bg-background text-foreground min-h-screen">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
+    </html>
+  );
+}

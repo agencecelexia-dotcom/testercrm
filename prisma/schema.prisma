@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  AGENCE
+  CLIENT
+  CLOSER
+}
+
+enum ProspectStatus {
+  A_TRAITER
+  NON_QUALIFIE
+  QUALIFIE
+  DEVIS_ENVOYE
+  DEVIS_ACCEPTE
+  ACOMPTE_RECU
+  SOLDE_RECU
+  TERMINE
+}
+
+enum InvoiceStatus {
+  PENDING
+  SENT
+  PAID
+  OVERDUE
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  role          Role
+  name          String
+  phone         String?
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  clientProfile  ClientProfile?
+  closerProfile  CloserProfile?
+}
+
+model ClientProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  businessName    String
+  siret           String?
+  address         String?
+  city            String?
+  postalCode      String?
+  adAccountId     String?
+  monthlyAdSpend  Float     @default(0)
+  closerId        String?
+  closer          CloserProfile? @relation(fields: [closerId], references: [id])
+  prospects       Prospect[]
+  invoices        Invoice[]
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model CloserProfile {
+  id        String          @id @default(cuid())
+  userId    String          @unique
+  user      User            @relation(fields: [userId], references: [id])
+  clients   ClientProfile[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model Prospect {
+  id                String         @id @default(cuid())
+  clientId          String
+  client            ClientProfile  @relation(fields: [clientId], references: [id])
+
+  callerPhone       String
+  callerName        String?
+  callDate          DateTime
+  callDuration      Int?
+  callRecordingUrl  String?
+
+  status            ProspectStatus @default(A_TRAITER)
+  isQualified       Boolean?
+  unqualifiedReason String?
+
+  devisSent         Boolean        @default(false)
+  devisSentDate     DateTime?
+  devisAmount       Float?
+  devisAccepted     Boolean?
+  devisAcceptedDate DateTime?
+
+  acompteReceived   Float?
+  acompteDate       DateTime?
+  soldeReceived     Float?
+  soldeDate         DateTime?
+
+  totalChantier     Float?
+  chantierDone      Boolean        @default(false)
+
+  commissionAmount  Float?
+  commissionPaid    Boolean        @default(false)
+
+  notes             String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model Invoice {
+  id           String        @id @default(cuid())
+  clientId     String
+  client       ClientProfile @relation(fields: [clientId], references: [id])
+  month        Int
+  year         Int
+  totalRevenue Float
+  commission   Float
+  status       InvoiceStatus @default(PENDING)
+  pdfUrl       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
