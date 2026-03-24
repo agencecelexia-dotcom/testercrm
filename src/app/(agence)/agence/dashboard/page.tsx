@@ -15,7 +15,7 @@ const kpis = [
     icon: "payments",
   },
   {
-    label: "Commission pr\u00e9visionnelle",
+    label: "Commission prévisionnelle",
     value: formatCurrency(1540.2),
     trend: "+8.1%",
     trendUp: true,
@@ -29,7 +29,7 @@ const kpis = [
     icon: "group",
   },
   {
-    label: "Appels g\u00e9n\u00e9r\u00e9s",
+    label: "Appels générés",
     value: "142",
     trend: "+18.2%",
     trendUp: true,
@@ -39,7 +39,7 @@ const kpis = [
 
 const revenueMonths = [
   { month: "JAN", value: 2800 },
-  { month: "F\u00c9V", value: 3200 },
+  { month: "FÉV", value: 3200 },
   { month: "MAR", value: 4230 },
   { month: "AVR", value: 3900 },
   { month: "MAI", value: 4600 },
@@ -113,28 +113,28 @@ const recentDeals = [
     client: "TechVision SAS",
     montant: 4500,
     date: "Il y a 2h",
-    statut: "Devis accept\u00e9",
+    statut: "Devis accepté",
   },
   {
     prospect: "Marie Lefebvre",
     client: "DigiMarketing",
     montant: 2800,
     date: "Il y a 5h",
-    statut: "Acompte re\u00e7u",
+    statut: "Acompte reçu",
   },
   {
     prospect: "Pierre Martin",
     client: "SolairePro",
     montant: 3200,
     date: "Hier",
-    statut: "Qualifi\u00e9",
+    statut: "Qualifié",
   },
   {
     prospect: "Camille Bernard",
     client: "FormaPilot",
     montant: 1900,
     date: "Hier",
-    statut: "Devis envoy\u00e9",
+    statut: "Devis envoyé",
   },
 ];
 
@@ -170,7 +170,7 @@ export default function AgenceDashboardPage() {
           Tableau de Bord Global
         </h1>
         <p className="mt-1 text-[#c3c6d7]">
-          Vue d&apos;ensemble de l&apos;activit\u00e9 de votre agence Celexia
+          Vue d&apos;ensemble de l&apos;activité de votre agence Celexia
         </p>
       </div>
 
@@ -215,7 +215,7 @@ export default function AgenceDashboardPage() {
                 Revenus mensuels
               </h2>
               <p className="text-sm text-[#c3c6d7]">
-                \u00c9volution du chiffre d&apos;affaires
+                Évolution du chiffre d&apos;affaires
               </p>
             </div>
             <div className="flex items-center gap-2 rounded-lg bg-[#152032] px-3 py-1.5 text-xs text-[#c3c6d7]">
@@ -252,7 +252,7 @@ export default function AgenceDashboardPage() {
         {/* Donut Chart */}
         <div className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
           <h2 className="text-lg font-semibold text-white font-[family-name:var(--font-plus-jakarta-sans)] mb-4">
-            R\u00e9partition par client
+            Répartition par client
           </h2>
           {/* Donut placeholder */}
           <div className="relative mx-auto h-40 w-40 mb-6">
@@ -309,7 +309,7 @@ export default function AgenceDashboardPage() {
             Performance par client
           </h2>
           <p className="text-sm text-[#c3c6d7]">
-            D\u00e9tail des m\u00e9triques cl\u00e9s de chaque client
+            Détail des métriques clés de chaque client
           </p>
         </div>
         <div className="overflow-x-auto">
@@ -319,7 +319,7 @@ export default function AgenceDashboardPage() {
                 <th className="px-6 py-3 text-left font-medium">Client</th>
                 <th className="px-6 py-3 text-left font-medium">Closer</th>
                 <th className="px-6 py-3 text-right font-medium">Appels</th>
-                <th className="px-6 py-3 text-right font-medium">Qualifi\u00e9s</th>
+                <th className="px-6 py-3 text-right font-medium">Qualifiés</th>
                 <th className="px-6 py-3 text-right font-medium">Devis</th>
                 <th className="px-6 py-3 text-right font-medium">CA</th>
                 <th className="px-6 py-3 text-right font-medium">Commission</th>
@@ -371,7 +371,7 @@ export default function AgenceDashboardPage() {
         <div className="lg:col-span-2 rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-white font-[family-name:var(--font-plus-jakarta-sans)]">
-              Deals r\u00e9cents
+              Deals récents
             </h2>
             <span className="relative flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -435,7 +435,7 @@ export default function AgenceDashboardPage() {
             </div>
             <div className="mt-4 flex items-center justify-between text-sm">
               <div>
-                <p className="text-[#c3c6d7]">R\u00e9alis\u00e9</p>
+                <p className="text-[#c3c6d7]">Réalisé</p>
                 <p className="font-semibold text-white">
                   {formatCurrency(34000)}
                 </p>

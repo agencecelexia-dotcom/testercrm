@@ -26,16 +26,16 @@ const client = {
 };
 
 const tabs = [
-  { label: "Vue g\u00e9n\u00e9rale", icon: "dashboard" },
+  { label: "Vue générale", icon: "dashboard" },
   { label: "Prospects", icon: "people" },
   { label: "Facturation", icon: "receipt_long" },
-  { label: "Param\u00e8tres", icon: "settings" },
+  { label: "Paramètres", icon: "settings" },
 ];
 
 const kpis = [
   { label: "Appels totaux", value: "482", icon: "call", trend: "+24" },
   {
-    label: "CA g\u00e9n\u00e9r\u00e9",
+    label: "CA généré",
     value: formatCurrency(142500),
     icon: "payments",
     trend: "+12%",
@@ -51,9 +51,9 @@ const kpis = [
 const activityMonths = [
   { month: "OCT", appels: 62, qualifies: 28 },
   { month: "NOV", appels: 78, qualifies: 35 },
-  { month: "D\u00c9C", appels: 85, qualifies: 40 },
+  { month: "DÉC", appels: 85, qualifies: 40 },
   { month: "JAN", appels: 92, qualifies: 44 },
-  { month: "F\u00c9V", appels: 80, qualifies: 38 },
+  { month: "FÉV", appels: 80, qualifies: 38 },
   { month: "MAR", appels: 85, qualifies: 42 },
 ];
 
@@ -61,17 +61,17 @@ const notes = [
   {
     author: "Admin",
     date: "2026-03-20",
-    text: "Client tr\u00e8s satisfait du nouveau closer assign\u00e9. Augmentation notable du taux de conversion.",
+    text: "Client très satisfait du nouveau closer assigné. Augmentation notable du taux de conversion.",
   },
   {
     author: "Julien M.",
     date: "2026-03-15",
-    text: "Prospects de bonne qualit\u00e9 ce mois-ci. Pr\u00e9voir un upsell sur la gamme premium.",
+    text: "Prospects de bonne qualité ce mois-ci. Prévoir un upsell sur la gamme premium.",
   },
   {
     author: "Admin",
     date: "2026-02-28",
-    text: "Facture de f\u00e9vrier envoy\u00e9e. En attente de paiement.",
+    text: "Facture de février envoyée. En attente de paiement.",
   },
 ];
 
@@ -210,7 +210,7 @@ export default function ClientDetailPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-semibold text-white font-[family-name:var(--font-plus-jakarta-sans)]">
-                Activit\u00e9
+                Activité
               </h2>
               <p className="text-sm text-[#c3c6d7]">
                 Appels et qualifications mensuels
@@ -223,7 +223,7 @@ export default function ClientDetailPage() {
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-[#03b5d3]" />
-                Qualifi\u00e9s
+                Qualifiés
               </span>
             </div>
           </div>
@@ -258,7 +258,7 @@ export default function ClientDetailPage() {
         {/* Closer Sidebar */}
         <div className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
           <h2 className="text-lg font-semibold text-white font-[family-name:var(--font-plus-jakarta-sans)] mb-4">
-            Closer assign\u00e9
+            Closer assigné
           </h2>
           <div className="flex items-center gap-3 mb-5">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-brand text-white font-bold">
@@ -284,7 +284,7 @@ export default function ClientDetailPage() {
             </div>
             <div className="flex items-center justify-between rounded-lg bg-[#152032]/60 px-4 py-3">
               <span className="text-sm text-[#c3c6d7]">
-                Prospects g\u00e9r\u00e9s
+                Prospects gérés
               </span>
               <span className="text-sm font-semibold text-white">
                 {client.closer.prospects}

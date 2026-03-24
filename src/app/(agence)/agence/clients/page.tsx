@@ -101,7 +101,7 @@ export default function ClientsPage() {
             Clients
           </h1>
           <p className="mt-1 text-[#c3c6d7]">
-            G\u00e9rez l&apos;ensemble de vos clients et leur activit\u00e9
+            Gérez l&apos;ensemble de vos clients et leur activité
           </p>
         </div>
         <button className="inline-flex items-center gap-2 rounded-lg bg-gradient-brand px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#2563eb]/25 transition hover:shadow-[#2563eb]/40 hover:brightness-110">
@@ -153,7 +153,7 @@ export default function ClientsPage() {
           </span>
           <span>
             <span className="font-semibold text-white">{filtered.length}</span>{" "}
-            client{filtered.length > 1 ? "s" : ""} trouv\u00e9
+            client{filtered.length > 1 ? "s" : ""} trouvé
             {filtered.length > 1 ? "s" : ""}
           </span>
         </div>
@@ -228,7 +228,7 @@ export default function ClientsPage() {
               </div>
               <div className="rounded-lg bg-[#152032]/60 px-3 py-2">
                 <p className="text-[10px] text-[#c3c6d7] uppercase tracking-wider">
-                  Qualifi\u00e9s
+                  Qualifiés
                 </p>
                 <p className="text-sm font-semibold text-white">
                   {client.qualifies}
