@@ -7,265 +7,257 @@ import { useState } from "react";
 /*  Mock data                                                                  */
 /* ──────────────────────────────────────────────────────────────────────────── */
 
-const filterTabs = ["Tous", "Actifs", "Inactifs"];
-
-const sortOptions = [
-  "CA d\u00e9croissant",
-  "CA croissant",
-  "Clients d\u00e9croissant",
-  "Nom A-Z",
-];
-
-const closersList = [
+const closers = [
   {
     id: "CLO-001",
-    name: "Julien Mercier",
+    name: "Julien Marchand",
+    avatar: "JM",
     email: "julien@celexia.fr",
     phone: "06 12 34 56 78",
-    avatar: "JM",
-    active: true,
     clients: 8,
-    ca: 245000,
-    commission: 24500,
-    specialite: "SaaS / Tech",
+    prospects: 142,
+    ca: 285000,
+    commissions: 28500,
+    taux: 45.8,
+    status: "actif",
   },
   {
     id: "CLO-002",
-    name: "Sophie Laurent",
+    name: "Sophie Durand",
+    avatar: "SD",
     email: "sophie@celexia.fr",
     phone: "06 98 76 54 32",
-    avatar: "SL",
-    active: true,
     clients: 6,
-    ca: 198000,
-    commission: 19800,
-    specialite: "Marketing Digital",
+    prospects: 98,
+    ca: 195000,
+    commissions: 19500,
+    taux: 52.3,
+    status: "actif",
   },
   {
     id: "CLO-003",
-    name: "Marc Dupont",
+    name: "Marc Lefebvre",
+    avatar: "ML",
     email: "marc@celexia.fr",
-    phone: "06 45 67 89 01",
-    avatar: "MD",
-    active: true,
+    phone: "06 55 44 33 22",
     clients: 5,
-    ca: 167000,
-    commission: 16700,
-    specialite: "\u00c9nergie",
+    prospects: 76,
+    ca: 148000,
+    commissions: 14800,
+    taux: 38.2,
+    status: "actif",
   },
   {
     id: "CLO-004",
-    name: "Emma Richard",
+    name: "Emma Petit",
+    avatar: "EP",
     email: "emma@celexia.fr",
-    phone: "06 23 45 67 89",
-    avatar: "ER",
-    active: false,
-    clients: 3,
-    ca: 124000,
-    commission: 12400,
-    specialite: "Formation",
+    phone: "06 11 22 33 44",
+    clients: 4,
+    prospects: 61,
+    ca: 112000,
+    commissions: 11200,
+    taux: 41.5,
+    status: "pause",
   },
   {
     id: "CLO-005",
     name: "Lucas Bernard",
-    email: "lucas@celexia.fr",
-    phone: "06 78 90 12 34",
     avatar: "LB",
-    active: true,
-    clients: 4,
-    ca: 111200,
-    commission: 11120,
-    specialite: "E-commerce",
+    email: "lucas@celexia.fr",
+    phone: "06 77 88 99 00",
+    clients: 7,
+    prospects: 115,
+    ca: 230000,
+    commissions: 23000,
+    taux: 49.1,
+    status: "actif",
+  },
+  {
+    id: "CLO-006",
+    name: "Camille Roux",
+    avatar: "CR",
+    email: "camille@celexia.fr",
+    phone: "06 33 22 11 00",
+    clients: 3,
+    prospects: 42,
+    ca: 78000,
+    commissions: 7800,
+    taux: 35.7,
+    status: "inactif",
   },
 ];
 
-const globalKpis = [
+const kpis = [
+  { label: "Total closers", value: "6", icon: "groups", trend: "+1" },
+  { label: "Closers actifs", value: "4", icon: "verified", trend: "+0" },
   {
-    label: "Performance Global",
-    value: "87%",
-    sublabel: "Taux de conversion moyen",
-    icon: "speed",
-    color: "text-[#2563eb]",
+    label: "CA total généré",
+    value: formatCurrency(1048000),
+    icon: "payments",
+    trend: "+18%",
   },
   {
-    label: "Total Commissions",
-    value: formatCurrency(84520),
-    sublabel: "Cumul\u00e9 ce trimestre",
+    label: "Commissions totales",
+    value: formatCurrency(104800),
     icon: "account_balance_wallet",
-    color: "text-[#03b5d3]",
-  },
-  {
-    label: "Effectif Actif",
-    value: "4 / 5",
-    sublabel: "Closers en activit\u00e9",
-    icon: "groups",
-    color: "text-emerald-400",
+    trend: "+15%",
   },
 ];
+
+const filters = ["Tous", "Actifs", "En pause", "Inactifs"];
 
 /* ──────────────────────────────────────────────────────────────────────────── */
 /*  Page                                                                       */
 /* ──────────────────────────────────────────────────────────────────────────── */
 
 export default function ClosersPage() {
+  const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tous");
-  const [sortBy, setSortBy] = useState(sortOptions[0]);
 
-  const filtered = closersList.filter((c) => {
-    if (activeFilter === "Actifs") return c.active;
-    if (activeFilter === "Inactifs") return !c.active;
-    return true;
+  const filtered = closers.filter((c) => {
+    const matchSearch =
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.id.toLowerCase().includes(search.toLowerCase());
+    const matchFilter =
+      activeFilter === "Tous" ||
+      (activeFilter === "Actifs" && c.status === "actif") ||
+      (activeFilter === "En pause" && c.status === "pause") ||
+      (activeFilter === "Inactifs" && c.status === "inactif");
+    return matchSearch && matchFilter;
   });
+
+  const statusColor: Record<string, string> = {
+    actif: "bg-emerald-500/20 text-emerald-400",
+    pause: "bg-amber-500/20 text-amber-400",
+    inactif: "bg-red-500/20 text-red-400",
+  };
+
+  const statusLabel: Record<string, string> = {
+    actif: "Actif",
+    pause: "En pause",
+    inactif: "Inactif",
+  };
 
   return (
     <div className="space-y-8">
-      {/* ── Header ──────────────────────────────────────────────────────── */}
+      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white font-[family-name:var(--font-plus-jakarta-sans)]">
+          <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-plus-jakarta-sans)]">
             Closers
           </h1>
-          <p className="mt-1 text-[#c3c6d7]">
-            G\u00e9rez votre \u00e9quipe de closers et suivez leurs performances
+          <p className="text-sm text-[#c3c6d7] mt-1">
+            Gérez votre équipe de closers et suivez leurs performances
           </p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-lg bg-gradient-brand px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#2563eb]/25 transition hover:shadow-[#2563eb]/40 hover:brightness-110">
-          <span className="material-symbols-outlined text-lg">
-            person_add
-          </span>
+        <button className="inline-flex items-center gap-2 rounded-lg bg-gradient-brand px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#2563eb]/25">
+          <span className="material-symbols-outlined text-base">person_add</span>
           Ajouter un closer
         </button>
       </div>
 
-      {/* ── Filters ─────────────────────────────────────────────────────── */}
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {kpis.map((k) => (
+          <div
+            key={k.label}
+            className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-[#c3c6d7]">{k.label}</p>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#152032] text-[#2563eb]">
+                <span className="material-symbols-outlined text-lg">{k.icon}</span>
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-white">{k.value}</p>
+            <div className="mt-2 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-base text-emerald-400">trending_up</span>
+              <span className="text-sm font-medium bg-gradient-to-r from-emerald-400 to-[#03b5d3] bg-clip-text text-transparent">{k.trend}</span>
+              <span className="text-xs text-[#c3c6d7]">ce mois</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters + Search */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-1 rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-1.5">
-          {filterTabs.map((tab) => (
+          {filters.map((f) => (
             <button
-              key={tab}
-              onClick={() => setActiveFilter(tab)}
+              key={f}
+              onClick={() => setActiveFilter(f)}
               className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                activeFilter === tab
+                activeFilter === f
                   ? "bg-[#2563eb] text-white shadow-lg shadow-[#2563eb]/25"
                   : "text-[#c3c6d7] hover:text-white hover:bg-[#152032]/60"
               }`}
             >
-              {tab}
+              {f}
             </button>
           ))}
         </div>
-
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="rounded-lg bg-[#202a3d]/60 border border-[#434655]/20 px-3 py-2 text-sm text-[#d8e3fc] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50"
-        >
-          {sortOptions.map((o) => (
-            <option key={o} value={o}>
-              Trier: {o}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c3c6d7] text-lg">search</span>
+          <input
+            type="text"
+            placeholder="Rechercher un closer..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-72 rounded-lg bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 pl-10 pr-4 py-2.5 text-sm text-white placeholder-[#c3c6d7]/50 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50"
+          />
+        </div>
       </div>
 
-      {/* ── Closer Cards Grid ───────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+      {/* Closer Cards Grid */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((closer) => (
           <a
             key={closer.id}
             href={`/agence/closers/${closer.id}`}
-            className="group rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg transition-all duration-200 hover:scale-[1.01] hover:border-[#2563eb]/30"
+            className="group rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg hover:border-[#2563eb]/30 transition-all"
           >
-            {/* Top */}
-            <div className="flex items-start justify-between mb-5">
+            <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-brand text-white font-bold text-sm">
-                    {closer.avatar}
-                  </div>
-                  <span
-                    className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[#202a3d] ${
-                      closer.active ? "bg-emerald-500" : "bg-gray-500"
-                    }`}
-                  />
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-brand text-white font-bold">
+                  {closer.avatar}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white group-hover:text-gradient transition">
-                    {closer.name}
-                  </h3>
-                  <p className="text-xs text-[#c3c6d7]">{closer.id}</p>
+                  <p className="font-semibold text-white group-hover:text-[#2563eb] transition-colors">{closer.name}</p>
+                  <p className="text-xs text-[#c3c6d7]">{closer.email}</p>
                 </div>
               </div>
-              <span
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
-                  closer.active
-                    ? "bg-emerald-500/20 text-emerald-400"
-                    : "bg-gray-500/20 text-gray-400"
-                }`}
-              >
-                {closer.active ? "Actif" : "Inactif"}
+              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor[closer.status]}`}>
+                {statusLabel[closer.status]}
               </span>
             </div>
 
-            {/* Speciality */}
-            <div className="flex items-center gap-2 mb-4 text-sm text-[#c3c6d7]">
-              <span className="material-symbols-outlined text-base">
-                work
-              </span>
-              {closer.specialite}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="rounded-lg bg-[#152032]/60 px-3 py-2.5">
+                <p className="text-xs text-[#c3c6d7]">Clients</p>
+                <p className="text-lg font-bold text-white">{closer.clients}</p>
+              </div>
+              <div className="rounded-lg bg-[#152032]/60 px-3 py-2.5">
+                <p className="text-xs text-[#c3c6d7]">Prospects</p>
+                <p className="text-lg font-bold text-white">{closer.prospects}</p>
+              </div>
+              <div className="rounded-lg bg-[#152032]/60 px-3 py-2.5">
+                <p className="text-xs text-[#c3c6d7]">CA généré</p>
+                <p className="text-sm font-bold text-white">{formatCurrency(closer.ca)}</p>
+              </div>
+              <div className="rounded-lg bg-[#152032]/60 px-3 py-2.5">
+                <p className="text-xs text-[#c3c6d7]">Taux conv.</p>
+                <p className="text-lg font-bold text-emerald-400">{closer.taux}%</p>
+              </div>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-lg bg-[#152032]/60 px-3 py-2.5 text-center">
-                <p className="text-[10px] text-[#c3c6d7] uppercase tracking-wider mb-1">
-                  Clients
-                </p>
-                <p className="text-base font-bold text-white">
-                  {closer.clients}
-                </p>
-              </div>
-              <div className="rounded-lg bg-[#152032]/60 px-3 py-2.5 text-center">
-                <p className="text-[10px] text-[#c3c6d7] uppercase tracking-wider mb-1">
-                  CA
-                </p>
-                <p className="text-base font-bold text-white">
-                  {(closer.ca / 1000).toFixed(0)}k\u20ac
-                </p>
-              </div>
-              <div className="rounded-lg bg-[#152032]/60 px-3 py-2.5 text-center">
-                <p className="text-[10px] text-[#c3c6d7] uppercase tracking-wider mb-1">
-                  Commission
-                </p>
-                <p className="text-base font-bold text-gradient">
-                  {(closer.commission / 1000).toFixed(1)}k\u20ac
-                </p>
-              </div>
+            <div className="flex items-center justify-between pt-3 border-t border-[#434655]/10">
+              <p className="text-sm text-[#c3c6d7]">
+                Commissions : <span className="font-semibold text-white">{formatCurrency(closer.commissions)}</span>
+              </p>
+              <span className="material-symbols-outlined text-[#c3c6d7] group-hover:text-[#2563eb] transition-colors">arrow_forward</span>
             </div>
           </a>
-        ))}
-      </div>
-
-      {/* ── Bottom KPI Row ──────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-        {globalKpis.map((k) => (
-          <div
-            key={k.label}
-            className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-5 shadow-lg flex items-center gap-4"
-          >
-            <div
-              className={`flex h-12 w-12 items-center justify-center rounded-xl bg-[#152032] ${k.color} shrink-0`}
-            >
-              <span className="material-symbols-outlined text-2xl">
-                {k.icon}
-              </span>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-[#c3c6d7]">{k.label}</p>
-              <p className="text-xl font-bold text-white">{k.value}</p>
-              <p className="text-xs text-[#c3c6d7]">{k.sublabel}</p>
-            </div>
-          </div>
         ))}
       </div>
     </div>
