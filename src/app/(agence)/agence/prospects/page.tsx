@@ -7,406 +7,164 @@ import { useState } from "react";
 /*  Mock data                                                                  */
 /* ──────────────────────────────────────────────────────────────────────────── */
 
-const stats = [
-  {
-    label: "Total appels",
-    value: "1 248",
-    icon: "call",
-    trend: "+142 ce mois",
-  },
-  {
-    label: "Qualifi\u00e9s (SET)",
-    value: "486",
-    icon: "verified",
-    trend: "38.9% taux",
-  },
-  {
-    label: "CA Pr\u00e9visionnel",
-    value: formatCurrency(284500),
-    icon: "trending_up",
-    trend: "+18.4%",
-  },
+const kpis = [
+  { label: "Total prospects", value: "1 247", icon: "people", trend: "+86" },
+  { label: "Qualifiés", value: "438", icon: "verified", trend: "+32" },
+  { label: "En cours", value: "312", icon: "pending", trend: "+18" },
+  { label: "Valeur estimée", value: formatCurrency(892000), icon: "payments", trend: "+14%" },
 ];
 
-const statusOptions = [
-  { value: "all", label: "Tous les statuts" },
-  { value: "A_TRAITER", label: "\u00c0 traiter" },
-  { value: "QUALIFIE", label: "Qualifi\u00e9" },
-  { value: "DEVIS_ENVOYE", label: "Devis envoy\u00e9" },
-  { value: "DEVIS_ACCEPTE", label: "Devis accept\u00e9" },
-  { value: "ACOMPTE_RECU", label: "Acompte re\u00e7u" },
-  { value: "NON_QUALIFIE", label: "Non qualifi\u00e9" },
-  { value: "TERMINE", label: "Termin\u00e9" },
-];
-
-const clientOptions = [
-  "Tous les clients",
-  "TechVision SAS",
-  "DigiMarketing",
-  "SolairePro",
-  "FormaPilot",
-  "CleanOffice",
-];
-
-const closerOptions = [
-  "Tous les closers",
-  "Julien M.",
-  "Sophie L.",
-  "Marc D.",
-  "Emma R.",
-];
-
-type StatusKey =
-  | "A_TRAITER"
-  | "QUALIFIE"
-  | "DEVIS_ENVOYE"
-  | "DEVIS_ACCEPTE"
-  | "ACOMPTE_RECU"
-  | "NON_QUALIFIE"
-  | "TERMINE";
-
-function statusBadge(status: StatusKey) {
-  const map: Record<StatusKey, { bg: string; text: string; label: string }> = {
-    A_TRAITER: {
-      bg: "bg-gray-500/20",
-      text: "text-gray-400",
-      label: "\u00c0 traiter",
-    },
-    QUALIFIE: {
-      bg: "bg-blue-500/20",
-      text: "text-blue-400",
-      label: "Qualifi\u00e9",
-    },
-    DEVIS_ENVOYE: {
-      bg: "bg-yellow-500/20",
-      text: "text-yellow-400",
-      label: "Devis envoy\u00e9",
-    },
-    DEVIS_ACCEPTE: {
-      bg: "bg-emerald-500/20",
-      text: "text-emerald-400",
-      label: "Devis accept\u00e9",
-    },
-    ACOMPTE_RECU: {
-      bg: "bg-teal-500/20",
-      text: "text-teal-400",
-      label: "Acompte re\u00e7u",
-    },
-    NON_QUALIFIE: {
-      bg: "bg-red-500/20",
-      text: "text-red-400",
-      label: "Non qualifi\u00e9",
-    },
-    TERMINE: {
-      bg: "bg-purple-500/20",
-      text: "text-purple-400",
-      label: "Termin\u00e9",
-    },
-  };
-  const s = map[status];
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${s.bg} ${s.text}`}
-    >
-      {s.label}
-    </span>
-  );
-}
+const statusOptions = ["Tous", "Nouveau", "Contacté", "Qualifié", "Proposition", "Gagné", "Perdu"];
 
 const prospects = [
-  {
-    client: "TechVision SAS",
-    nom: "Laurent Dupuis",
-    tel: "06 12 34 56 78",
-    statut: "DEVIS_ACCEPTE" as StatusKey,
-    date: "2026-03-22",
-    montant: 4500,
-    closer: "Julien M.",
-  },
-  {
-    client: "DigiMarketing",
-    nom: "Marie Lefebvre",
-    tel: "06 98 76 54 32",
-    statut: "ACOMPTE_RECU" as StatusKey,
-    date: "2026-03-21",
-    montant: 2800,
-    closer: "Sophie L.",
-  },
-  {
-    client: "SolairePro",
-    nom: "Pierre Martin",
-    tel: "06 45 67 89 01",
-    statut: "QUALIFIE" as StatusKey,
-    date: "2026-03-20",
-    montant: 3200,
-    closer: "Marc D.",
-  },
-  {
-    client: "TechVision SAS",
-    nom: "Camille Bernard",
-    tel: "06 23 45 67 89",
-    statut: "DEVIS_ENVOYE" as StatusKey,
-    date: "2026-03-19",
-    montant: 1900,
-    closer: "Julien M.",
-  },
-  {
-    client: "FormaPilot",
-    nom: "Nicolas Petit",
-    tel: "06 78 90 12 34",
-    statut: "A_TRAITER" as StatusKey,
-    date: "2026-03-18",
-    montant: 0,
-    closer: "Emma R.",
-  },
-  {
-    client: "CleanOffice",
-    nom: "Sophie Moreau",
-    tel: "06 34 56 78 90",
-    statut: "NON_QUALIFIE" as StatusKey,
-    date: "2026-03-17",
-    montant: 0,
-    closer: "Julien M.",
-  },
-  {
-    client: "DigiMarketing",
-    nom: "Thomas Garcia",
-    tel: "06 56 78 90 12",
-    statut: "TERMINE" as StatusKey,
-    date: "2026-03-16",
-    montant: 5200,
-    closer: "Sophie L.",
-  },
-  {
-    client: "SolairePro",
-    nom: "Julie Robert",
-    tel: "06 67 89 01 23",
-    statut: "QUALIFIE" as StatusKey,
-    date: "2026-03-15",
-    montant: 2400,
-    closer: "Marc D.",
-  },
-  {
-    client: "TechVision SAS",
-    nom: "Antoine Durand",
-    tel: "06 89 01 23 45",
-    statut: "DEVIS_ACCEPTE" as StatusKey,
-    date: "2026-03-14",
-    montant: 3800,
-    closer: "Julien M.",
-  },
-  {
-    client: "FormaPilot",
-    nom: "Isabelle Fournier",
-    tel: "06 01 23 45 67",
-    statut: "A_TRAITER" as StatusKey,
-    date: "2026-03-13",
-    montant: 0,
-    closer: "Emma R.",
-  },
+  { id: "PRO-1001", nom: "Pierre Dupont", entreprise: "Nexus Digital", email: "p.dupont@nexus.fr", telephone: "06 12 45 78 90", source: "LinkedIn", closer: "Julien M.", client: "TechVision SAS", status: "Qualifié", valeur: 15000, createdAt: "2026-03-18" },
+  { id: "PRO-1002", nom: "Marie Laurent", entreprise: "Eco Solutions", email: "m.laurent@ecosol.fr", telephone: "06 98 76 54 32", source: "Site web", closer: "Sophie D.", client: "GreenTech Innovations", status: "Proposition", valeur: 22000, createdAt: "2026-03-17" },
+  { id: "PRO-1003", nom: "Thomas Martin", entreprise: "FinTech Pro", email: "t.martin@fintechpro.fr", telephone: "06 45 67 89 01", source: "Recommandation", closer: "Lucas B.", client: "NeoBank Finance", status: "Nouveau", valeur: 8500, createdAt: "2026-03-20" },
+  { id: "PRO-1004", nom: "Claire Beaumont", entreprise: "Média Plus", email: "c.beaumont@mediaplus.fr", telephone: "06 33 22 11 00", source: "Salon", closer: "Julien M.", client: "PixelForge Studio", status: "Contacté", valeur: 12000, createdAt: "2026-03-15" },
+  { id: "PRO-1005", nom: "Antoine Moreau", entreprise: "SantéConnect", email: "a.moreau@santeconnect.fr", telephone: "06 77 88 99 00", source: "Google Ads", closer: "Marc L.", client: "MediSoft Santé", status: "Gagné", valeur: 28000, createdAt: "2026-03-10" },
+  { id: "PRO-1006", nom: "Julie Rousseau", entreprise: "FormaPro", email: "j.rousseau@formapro.fr", telephone: "06 55 44 33 22", source: "LinkedIn", closer: "Emma P.", client: "EduPrime Formation", status: "Perdu", valeur: 9500, createdAt: "2026-03-08" },
+  { id: "PRO-1007", nom: "Nicolas Blanc", entreprise: "LogiTrans SARL", email: "n.blanc@logitrans.fr", telephone: "06 11 22 33 44", source: "Site web", closer: "Sophie D.", client: "DataFlow Corp", status: "Qualifié", valeur: 18500, createdAt: "2026-03-19" },
+  { id: "PRO-1008", nom: "Isabelle Chevalier", entreprise: "Design Factory", email: "i.chevalier@designfactory.fr", telephone: "06 66 55 44 33", source: "Recommandation", closer: "Lucas B.", client: "CloudNine Solutions", status: "Proposition", valeur: 31000, createdAt: "2026-03-16" },
+  { id: "PRO-1009", nom: "François Girard", entreprise: "AutoTech Services", email: "f.girard@autotech.fr", telephone: "06 22 33 44 55", source: "Salon", closer: "Julien M.", client: "TechVision SAS", status: "Contacté", valeur: 14000, createdAt: "2026-03-21" },
+  { id: "PRO-1010", nom: "Camille Fabre", entreprise: "BioNature Lab", email: "c.fabre@bionature.fr", telephone: "06 44 55 66 77", source: "Google Ads", closer: "Marc L.", client: "GreenTech Innovations", status: "Nouveau", valeur: 7200, createdAt: "2026-03-22" },
 ];
+
+const statusColor: Record<string, string> = {
+  Nouveau: "bg-blue-500/20 text-blue-400",
+  "Contacté": "bg-purple-500/20 text-purple-400",
+  "Qualifié": "bg-cyan-500/20 text-cyan-400",
+  Proposition: "bg-amber-500/20 text-amber-400",
+  "Gagné": "bg-emerald-500/20 text-emerald-400",
+  Perdu: "bg-red-500/20 text-red-400",
+};
 
 /* ──────────────────────────────────────────────────────────────────────────── */
 /*  Page                                                                       */
 /* ──────────────────────────────────────────────────────────────────────────── */
 
 export default function ProspectsPage() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 5;
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("Tous");
+
+  const filtered = prospects.filter((p) => {
+    const matchSearch =
+      p.nom.toLowerCase().includes(search.toLowerCase()) ||
+      p.entreprise.toLowerCase().includes(search.toLowerCase()) ||
+      p.id.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter === "Tous" || p.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
 
   return (
     <div className="space-y-8">
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div>
-        <h1 className="text-3xl font-bold text-white font-[family-name:var(--font-plus-jakarta-sans)]">
-          Tous les Prospects
-        </h1>
-        <p className="mt-1 text-[#c3c6d7]">
-          Vue globale de tous les prospects de vos clients
-        </p>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-plus-jakarta-sans)]">Prospects</h1>
+          <p className="text-sm text-[#c3c6d7] mt-1">Vue globale de tous les prospects de l&apos;agence</p>
+        </div>
+        <button className="inline-flex items-center gap-2 rounded-lg bg-gradient-brand px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#2563eb]/25">
+          <span className="material-symbols-outlined text-base">person_add</span>
+          Nouveau prospect
+        </button>
       </div>
 
-      {/* ── Stat Cards ──────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-5 shadow-lg flex items-center gap-4"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#152032] text-[#2563eb] shrink-0">
-              <span className="material-symbols-outlined text-2xl">
-                {s.icon}
-              </span>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {kpis.map((k) => (
+          <div key={k.label} className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-[#c3c6d7]">{k.label}</p>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#152032] text-[#2563eb]">
+                <span className="material-symbols-outlined text-lg">{k.icon}</span>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-[#c3c6d7]">{s.label}</p>
-              <p className="text-xl font-bold text-white">{s.value}</p>
-              <p className="text-xs text-emerald-400">{s.trend}</p>
+            <p className="text-2xl font-bold text-white">{k.value}</p>
+            <div className="mt-2 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-base text-emerald-400">trending_up</span>
+              <span className="text-sm font-medium bg-gradient-to-r from-emerald-400 to-[#03b5d3] bg-clip-text text-transparent">{k.trend}</span>
+              <span className="text-xs text-[#c3c6d7]">ce mois</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ── Advanced Filters ────────────────────────────────────────────── */}
-      <div className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-5 shadow-lg">
-        <div className="flex items-center gap-2 mb-4 text-sm font-medium text-[#c3c6d7]">
-          <span className="material-symbols-outlined text-base">
-            filter_list
-          </span>
-          Filtres avanc\u00e9s
+      {/* Filters + Search */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center gap-1 rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-1.5 overflow-x-auto">
+          {statusOptions.map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition ${
+                statusFilter === s
+                  ? "bg-[#2563eb] text-white shadow-lg shadow-[#2563eb]/25"
+                  : "text-[#c3c6d7] hover:text-white hover:bg-[#152032]/60"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
         </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <select className="rounded-lg bg-[#152032] border border-[#434655]/20 px-3 py-2 text-sm text-[#d8e3fc] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50">
-            {clientOptions.map((o) => (
-              <option key={o}>{o}</option>
-            ))}
-          </select>
-          <select className="rounded-lg bg-[#152032] border border-[#434655]/20 px-3 py-2 text-sm text-[#d8e3fc] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50">
-            {closerOptions.map((o) => (
-              <option key={o}>{o}</option>
-            ))}
-          </select>
-          <select className="rounded-lg bg-[#152032] border border-[#434655]/20 px-3 py-2 text-sm text-[#d8e3fc] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50">
-            {statusOptions.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+        <div className="relative">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c3c6d7] text-lg">search</span>
           <input
-            type="date"
-            className="rounded-lg bg-[#152032] border border-[#434655]/20 px-3 py-2 text-sm text-[#d8e3fc] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50"
-          />
-          <input
-            type="number"
-            placeholder="Montant min (\u20ac)"
-            className="rounded-lg bg-[#152032] border border-[#434655]/20 px-3 py-2 text-sm text-[#d8e3fc] placeholder:text-[#c3c6d7]/50 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50"
+            type="text"
+            placeholder="Rechercher un prospect..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full lg:w-80 rounded-lg bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 pl-10 pr-4 py-2.5 text-sm text-white placeholder-[#c3c6d7]/50 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50"
           />
         </div>
       </div>
 
-      {/* ── Prospects Table ─────────────────────────────────────────────── */}
+      {/* Prospects Table */}
       <div className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full">
             <thead>
-              <tr className="border-b border-[#434655]/10 text-[#c3c6d7]">
-                <th className="px-5 py-3 text-left font-medium">Client</th>
-                <th className="px-5 py-3 text-left font-medium">
-                  Nom Prospect
-                </th>
-                <th className="px-5 py-3 text-left font-medium">
-                  T\u00e9l\u00e9phone
-                </th>
-                <th className="px-5 py-3 text-center font-medium">Statut</th>
-                <th className="px-5 py-3 text-left font-medium">Date</th>
-                <th className="px-5 py-3 text-right font-medium">Montant</th>
-                <th className="px-5 py-3 text-left font-medium">Closer</th>
-                <th className="px-5 py-3 text-center font-medium">Actions</th>
+              <tr className="border-b border-[#434655]/15">
+                <th className="text-left py-3 px-4 text-xs font-semibold text-[#c3c6d7] uppercase tracking-wider">Prospect</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-[#c3c6d7] uppercase tracking-wider">Source</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-[#c3c6d7] uppercase tracking-wider">Closer</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-[#c3c6d7] uppercase tracking-wider">Client</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-[#c3c6d7] uppercase tracking-wider">Valeur</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-[#c3c6d7] uppercase tracking-wider">Date</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-[#c3c6d7] uppercase tracking-wider">Statut</th>
               </tr>
             </thead>
             <tbody>
-              {prospects.map((p, i) => (
-                <tr
-                  key={i}
-                  className="border-b border-[#434655]/10 hover:bg-[#152032]/40 transition-colors"
-                >
-                  <td className="px-5 py-3.5">
-                    <span className="text-[#c3c6d7]">{p.client}</span>
-                  </td>
-                  <td className="px-5 py-3.5 font-medium text-white">
-                    {p.nom}
-                  </td>
-                  <td className="px-5 py-3.5 text-[#c3c6d7] font-mono text-xs">
-                    {p.tel}
-                  </td>
-                  <td className="px-5 py-3.5 text-center">
-                    {statusBadge(p.statut)}
-                  </td>
-                  <td className="px-5 py-3.5 text-[#c3c6d7]">
-                    {formatDate(p.date)}
-                  </td>
-                  <td className="px-5 py-3.5 text-right font-medium text-white">
-                    {p.montant > 0 ? formatCurrency(p.montant) : "\u2014"}
-                  </td>
-                  <td className="px-5 py-3.5 text-[#c3c6d7]">{p.closer}</td>
-                  <td className="px-5 py-3.5 text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      <button
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[#2563eb]/20 text-[#2563eb] hover:bg-[#2563eb]/30 transition"
-                        title="Voir"
-                      >
-                        <span className="material-symbols-outlined text-sm">
-                          visibility
-                        </span>
-                      </button>
-                      <button
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[#03b5d3]/20 text-[#03b5d3] hover:bg-[#03b5d3]/30 transition"
-                        title="Appeler"
-                      >
-                        <span className="material-symbols-outlined text-sm">
-                          call
-                        </span>
-                      </button>
-                      <button
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[#152032] text-[#c3c6d7] hover:text-white transition"
-                        title="Plus"
-                      >
-                        <span className="material-symbols-outlined text-sm">
-                          more_vert
-                        </span>
-                      </button>
+              {filtered.map((p) => (
+                <tr key={p.id} className="border-b border-[#434655]/10 hover:bg-[#152032]/30 transition cursor-pointer">
+                  <td className="py-3 px-4">
+                    <div>
+                      <p className="text-sm font-medium text-white">{p.nom}</p>
+                      <p className="text-xs text-[#c3c6d7]">{p.entreprise} &middot; {p.id}</p>
                     </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className="inline-flex items-center rounded-full bg-[#152032] px-2.5 py-0.5 text-xs font-medium text-[#c3c6d7] border border-[#434655]/20">{p.source}</span>
+                  </td>
+                  <td className="py-3 px-4 text-sm text-[#c3c6d7]">{p.closer}</td>
+                  <td className="py-3 px-4 text-sm text-[#c3c6d7]">{p.client}</td>
+                  <td className="py-3 px-4 text-sm font-semibold text-white">{formatCurrency(p.valeur)}</td>
+                  <td className="py-3 px-4 text-sm text-[#c3c6d7]">{formatDate(p.createdAt)}</td>
+                  <td className="py-3 px-4">
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor[p.status]}`}>{p.status}</span>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-
-        {/* Pagination */}
-        <div className="flex items-center justify-between px-5 py-4 border-t border-[#434655]/10">
-          <p className="text-sm text-[#c3c6d7]">
-            Affichage de{" "}
-            <span className="font-medium text-white">1-10</span> sur{" "}
-            <span className="font-medium text-white">48</span> prospects
-          </p>
+        <div className="flex items-center justify-between px-4 py-3 border-t border-[#434655]/10">
+          <p className="text-sm text-[#c3c6d7]">Affichage de {filtered.length} sur {prospects.length} prospects</p>
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#152032] text-[#c3c6d7] hover:text-white disabled:opacity-40 transition"
-            >
-              <span className="material-symbols-outlined text-sm">
-                chevron_left
-              </span>
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-              (page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium transition ${
-                    currentPage === page
-                      ? "bg-[#2563eb] text-white"
-                      : "bg-[#152032] text-[#c3c6d7] hover:text-white"
-                  }`}
-                >
-                  {page}
-                </button>
-              )
-            )}
-            <button
-              onClick={() =>
-                setCurrentPage(Math.min(totalPages, currentPage + 1))
-              }
-              disabled={currentPage === totalPages}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#152032] text-[#c3c6d7] hover:text-white disabled:opacity-40 transition"
-            >
-              <span className="material-symbols-outlined text-sm">
-                chevron_right
-              </span>
-            </button>
+            <button className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#c3c6d7] hover:bg-[#152032]/60 transition">Précédent</button>
+            <button className="rounded-lg bg-[#2563eb] px-3 py-1.5 text-sm font-medium text-white">1</button>
+            <button className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#c3c6d7] hover:bg-[#152032]/60 transition">2</button>
+            <button className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#c3c6d7] hover:bg-[#152032]/60 transition">3</button>
+            <button className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#c3c6d7] hover:bg-[#152032]/60 transition">Suivant</button>
           </div>
         </div>
       </div>
