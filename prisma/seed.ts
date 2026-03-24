@@ -13,12 +13,12 @@ async function main() {
   await prisma.closerProfile.deleteMany();
   await prisma.user.deleteMany();
 
-  const hashedPassword = await bcrypt.hash("admin123", 10);
+  const hashedPassword = await bcrypt.hash("1234", 10);
 
   // 1. Create Agence user
   const agenceUser = await prisma.user.create({
     data: {
-      email: "admin@agencecelexia.fr",
+      email: "test@gmail.com",
       password: hashedPassword,
       role: Role.AGENCE,
       name: "Admin Celexia",
@@ -30,7 +30,7 @@ async function main() {
   // 2. Create Closers
   const closerRayan = await prisma.user.create({
     data: {
-      email: "rayan@celexia.fr",
+      email: "closer1@gmail.com",
       password: hashedPassword,
       role: Role.CLOSER,
       name: "Rayan Benali",
@@ -42,7 +42,7 @@ async function main() {
 
   const closerAdrien = await prisma.user.create({
     data: {
-      email: "adrien@celexia.fr",
+      email: "closer2@gmail.com",
       password: hashedPassword,
       role: Role.CLOSER,
       name: "Adrien Vasseur",
@@ -56,7 +56,7 @@ async function main() {
   // 3. Create Clients
   const clientMetbach = await prisma.user.create({
     data: {
-      email: "zachari@renovation-metbach.fr",
+      email: "client1@gmail.com",
       password: hashedPassword,
       role: Role.CLIENT,
       name: "Zachari Metbach",
@@ -79,7 +79,7 @@ async function main() {
 
   const clientAqualeo = await prisma.user.create({
     data: {
-      email: "contact@aqualeo.fr",
+      email: "client2@gmail.com",
       password: hashedPassword,
       role: Role.CLIENT,
       name: "Sarah Jenkins",
@@ -102,7 +102,7 @@ async function main() {
 
   const clientMabboux = await prisma.user.create({
     data: {
-      email: "julien@mabboux-plomberie.fr",
+      email: "client3@gmail.com",
       password: hashedPassword,
       role: Role.CLIENT,
       name: "Julien Mabboux",
@@ -470,10 +470,10 @@ async function main() {
   console.log(`✅ ${invoices.length} Invoices created`);
 
   console.log("\n🎉 Seeding complete!");
-  console.log("\n📋 Login credentials (all passwords: admin123):");
-  console.log("   Agence:  admin@agencecelexia.fr");
-  console.log("   Closer:  rayan@celexia.fr / adrien@celexia.fr");
-  console.log("   Client:  zachari@renovation-metbach.fr / contact@aqualeo.fr / julien@mabboux-plomberie.fr");
+  console.log("\n📋 Login credentials (all passwords: 1234):");
+  console.log("   Agence:  test@gmail.com");
+  console.log("   Closer:  closer1@gmail.com / closer2@gmail.com");
+  console.log("   Client:  client1@gmail.com / client2@gmail.com / client3@gmail.com");
 }
 
 main()
