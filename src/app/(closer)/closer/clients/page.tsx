@@ -1,146 +1,172 @@
 "use client";
 
+import { formatCurrency } from "@/lib/format";
 import { useState } from "react";
 
-/* ------------------------------------------------------------------ */
-/*  Mock data                                                         */
-/* ------------------------------------------------------------------ */
-type ClientStatus = "ACTIF" | "EN PAUSE" | "NOUVEAU";
+/* ──────────────────────────────────────────────────────────────────────────── */
+/*  Mock data                                                                  */
+/* ──────────────────────────────────────────────────────────────────────────── */
 
-interface CloserClient {
-  id: number;
-  name: string;
-  sector: string;
-  ca: string;
-  appels: number;
-  commission: string;
-  status: ClientStatus;
-  initials: string;
-  color: string;
-}
-
-const clientsList: CloserClient[] = [
-  { id: 1, name: "Réno Express", sector: "Rénovation", ca: "38,500 €", appels: 42, commission: "385 €", status: "ACTIF", initials: "RE", color: "from-[#2563eb] to-[#03b5d3]" },
-  { id: 2, name: "Solaire Plus", sector: "Énergie solaire", ca: "31,200 €", appels: 35, commission: "312 €", status: "ACTIF", initials: "SP", color: "from-emerald-500 to-teal-400" },
-  { id: 3, name: "Habitat Vert", sector: "Isolation", ca: "24,800 €", appels: 28, commission: "248 €", status: "ACTIF", initials: "HV", color: "from-violet-500 to-purple-400" },
-  { id: 4, name: "Isol'Pro", sector: "Isolation", ca: "19,500 €", appels: 22, commission: "195 €", status: "NOUVEAU", initials: "IP", color: "from-orange-500 to-amber-400" },
-  { id: 5, name: "Thermo Confort", sector: "Chauffage", ca: "16,200 €", appels: 18, commission: "162 €", status: "EN PAUSE", initials: "TC", color: "from-rose-500 to-pink-400" },
-  { id: 6, name: "Clim'Sud", sector: "Climatisation", ca: "12,300 €", appels: 15, commission: "123 €", status: "ACTIF", initials: "CS", color: "from-cyan-500 to-blue-400" },
-  { id: 7, name: "BatiNova", sector: "Construction", ca: "28,700 €", appels: 32, commission: "287 €", status: "ACTIF", initials: "BN", color: "from-indigo-500 to-blue-400" },
-  { id: 8, name: "ÉcoRénov", sector: "Rénovation", ca: "14,600 €", appels: 20, commission: "146 €", status: "NOUVEAU", initials: "ÉR", color: "from-green-500 to-emerald-400" },
-  { id: 9, name: "Fenêtres Pro", sector: "Menuiserie", ca: "9,800 €", appels: 12, commission: "98 €", status: "ACTIF", initials: "FP", color: "from-sky-500 to-cyan-400" },
+const clients = [
+  { id: "CLI-001", name: "TechVision SAS", owner: "Alexandre Morel", email: "contact@techvision.fr", prospectsActifs: 8, prospectsTotal: 32, ca: 68000, taux: 48.2, status: "actif", dernierAppel: "Aujourd'hui" },
+  { id: "CLI-003", name: "DataFlow Corp", owner: "Nathalie Bertrand", email: "contact@dataflow.fr", prospectsActifs: 6, prospectsTotal: 28, ca: 54000, taux: 52.1, status: "actif", dernierAppel: "Hier" },
+  { id: "CLI-005", name: "CloudNine Solutions", owner: "Marc Duval", email: "contact@cloudnine.fr", prospectsActifs: 5, prospectsTotal: 22, ca: 42000, taux: 44.8, status: "actif", dernierAppel: "Aujourd'hui" },
+  { id: "CLI-007", name: "PixelForge Studio", owner: "Clément Richard", email: "contact@pixelforge.fr", prospectsActifs: 4, prospectsTotal: 18, ca: 38000, taux: 39.5, status: "actif", dernierAppel: "Il y a 2 jours" },
+  { id: "CLI-009", name: "NeoBank Finance", owner: "Sophie Martinez", email: "contact@neobank.fr", prospectsActifs: 3, prospectsTotal: 15, ca: 31000, taux: 46.3, status: "pause", dernierAppel: "Il y a 5 jours" },
+  { id: "CLI-012", name: "GreenTech Innovations", owner: "Paul Lemoine", email: "contact@greentech.fr", prospectsActifs: 4, prospectsTotal: 14, ca: 28000, taux: 41.7, status: "actif", dernierAppel: "Hier" },
+  { id: "CLI-015", name: "MediSoft Santé", owner: "Dr. Anne Faure", email: "contact@medisoft.fr", prospectsActifs: 2, prospectsTotal: 8, ca: 15000, taux: 37.2, status: "actif", dernierAppel: "Il y a 3 jours" },
+  { id: "CLI-018", name: "EduPrime Formation", owner: "Thierry Blanc", email: "contact@eduprime.fr", prospectsActifs: 2, prospectsTotal: 5, ca: 9000, taux: 33.8, status: "inactif", dernierAppel: "Il y a 12 jours" },
 ];
 
-const statusColors: Record<ClientStatus, string> = {
-  ACTIF: "bg-emerald-500/20 text-emerald-400",
-  "EN PAUSE": "bg-yellow-500/20 text-yellow-400",
-  NOUVEAU: "bg-[#2563eb]/20 text-[#2563eb]",
+const filters = ["Tous", "Actifs", "En pause", "Inactifs"];
+
+const statusColor: Record<string, string> = {
+  actif: "bg-emerald-500/20 text-emerald-400",
+  pause: "bg-amber-500/20 text-amber-400",
+  inactif: "bg-red-500/20 text-red-400",
 };
 
-const statusIcon: Record<ClientStatus, string> = {
-  ACTIF: "check_circle",
-  "EN PAUSE": "pause_circle",
-  NOUVEAU: "fiber_new",
+const statusLabel: Record<string, string> = {
+  actif: "Actif",
+  pause: "En pause",
+  inactif: "Inactif",
 };
 
-/* ------------------------------------------------------------------ */
-/*  Page                                                              */
-/* ------------------------------------------------------------------ */
+/* ──────────────────────────────────────────────────────────────────────────── */
+/*  Page                                                                       */
+/* ──────────────────────────────────────────────────────────────────────────── */
+
 export default function CloserClientsPage() {
   const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState("Tous");
 
-  const filtered = clientsList.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = clients.filter((c) => {
+    const matchSearch =
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.owner.toLowerCase().includes(search.toLowerCase());
+    const matchFilter =
+      activeFilter === "Tous" ||
+      (activeFilter === "Actifs" && c.status === "actif") ||
+      (activeFilter === "En pause" && c.status === "pause") ||
+      (activeFilter === "Inactifs" && c.status === "inactif");
+    return matchSearch && matchFilter;
+  });
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <span className="material-symbols-outlined text-[#03b5d3] text-3xl">people</span>
-            Mes Clients
-          </h1>
-          <p className="mt-1 text-[#c3c6d7]">
-            {clientsList.length} client{clientsList.length > 1 ? "s" : ""} dans votre portefeuille
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-plus-jakarta-sans)]">Mes clients</h1>
+        <p className="text-sm text-[#c3c6d7] mt-1">Gérez vos clients assignés et suivez leur activité</p>
+      </div>
 
-        {/* Search */}
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <div className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-medium text-[#c3c6d7]">Clients actifs</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#152032] text-emerald-400">
+              <span className="material-symbols-outlined text-lg">check_circle</span>
+            </div>
+          </div>
+          <p className="text-2xl font-bold text-white">{clients.filter((c) => c.status === "actif").length}</p>
+        </div>
+        <div className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-medium text-[#c3c6d7]">Prospects actifs total</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#152032] text-[#2563eb]">
+              <span className="material-symbols-outlined text-lg">people</span>
+            </div>
+          </div>
+          <p className="text-2xl font-bold text-white">{clients.reduce((sum, c) => sum + c.prospectsActifs, 0)}</p>
+        </div>
+        <div className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-medium text-[#c3c6d7]">CA total</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#152032] text-[#03b5d3]">
+              <span className="material-symbols-outlined text-lg">payments</span>
+            </div>
+          </div>
+          <p className="text-2xl font-bold text-white">{formatCurrency(clients.reduce((sum, c) => sum + c.ca, 0))}</p>
+        </div>
+      </div>
+
+      {/* Filters + Search */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-1 rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-1.5">
+          {filters.map((f) => (
+            <button
+              key={f}
+              onClick={() => setActiveFilter(f)}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                activeFilter === f
+                  ? "bg-[#2563eb] text-white shadow-lg shadow-[#2563eb]/25"
+                  : "text-[#c3c6d7] hover:text-white hover:bg-[#152032]/60"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
         <div className="relative">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#434655] text-lg">
-            search
-          </span>
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c3c6d7] text-lg">search</span>
           <input
             type="text"
+            placeholder="Rechercher un client..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un client..."
-            className="w-full sm:w-72 rounded-lg border border-[#434655]/20 bg-[#152032] pl-10 pr-4 py-2.5 text-sm text-white outline-none focus:border-[#2563eb] transition-colors placeholder:text-[#434655]"
+            className="w-full sm:w-72 rounded-lg bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 pl-10 pr-4 py-2.5 text-sm text-white placeholder-[#c3c6d7]/50 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50"
           />
         </div>
       </div>
 
-      {/* Client Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Client Cards */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {filtered.map((client) => (
-          <div
-            key={client.id}
-            className="glass-card rounded-xl border border-[#434655]/10 p-6 hover:border-[#2563eb]/30 hover:shadow-lg hover:shadow-[#2563eb]/5 transition-all group cursor-pointer"
-          >
-            {/* Header */}
+          <div key={client.id} className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg hover:border-[#2563eb]/30 transition-all">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${client.color} text-white text-sm font-bold shadow-lg`}
-                >
-                  {client.initials}
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-brand text-white text-sm font-bold">
+                  {client.name.split(" ").map((w) => w[0]).join("").slice(0, 2)}
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white group-hover:text-[#03b5d3] transition-colors">
-                    {client.name}
-                  </h3>
-                  <p className="text-xs text-[#c3c6d7]">{client.sector}</p>
+                  <p className="font-semibold text-white">{client.name}</p>
+                  <p className="text-xs text-[#c3c6d7]">{client.owner} &middot; {client.id}</p>
                 </div>
               </div>
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusColors[client.status]}`}
-              >
-                <span className="material-symbols-outlined text-xs">{statusIcon[client.status]}</span>
-                {client.status}
+              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor[client.status]}`}>
+                {statusLabel[client.status]}
               </span>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-lg bg-[#152032] p-3 text-center">
-                <p className="text-lg font-bold text-white">{client.ca}</p>
-                <p className="text-[10px] text-[#c3c6d7] uppercase tracking-wider mt-0.5">CA généré</p>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="rounded-lg bg-[#152032]/60 px-3 py-2.5 text-center">
+                <p className="text-xs text-[#c3c6d7]">Prospects</p>
+                <p className="text-lg font-bold text-white">{client.prospectsActifs}<span className="text-xs font-normal text-[#c3c6d7]">/{client.prospectsTotal}</span></p>
               </div>
-              <div className="rounded-lg bg-[#152032] p-3 text-center">
-                <p className="text-lg font-bold text-white">{client.appels}</p>
-                <p className="text-[10px] text-[#c3c6d7] uppercase tracking-wider mt-0.5">Appels</p>
+              <div className="rounded-lg bg-[#152032]/60 px-3 py-2.5 text-center">
+                <p className="text-xs text-[#c3c6d7]">CA</p>
+                <p className="text-sm font-bold text-white">{formatCurrency(client.ca)}</p>
               </div>
-              <div className="rounded-lg bg-[#152032] p-3 text-center">
-                <p className="text-lg font-bold text-[#03b5d3]">{client.commission}</p>
-                <p className="text-[10px] text-[#c3c6d7] uppercase tracking-wider mt-0.5">Commission</p>
+              <div className="rounded-lg bg-[#152032]/60 px-3 py-2.5 text-center">
+                <p className="text-xs text-[#c3c6d7]">Conv.</p>
+                <p className={`text-lg font-bold ${client.taux >= 45 ? "text-emerald-400" : client.taux >= 38 ? "text-amber-400" : "text-red-400"}`}>{client.taux}%</p>
               </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-[#434655]/10">
+              <div className="flex items-center gap-1.5 text-xs text-[#c3c6d7]">
+                <span className="material-symbols-outlined text-sm">schedule</span>
+                Dernier appel : {client.dernierAppel}
+              </div>
+              <a href={`/closer/clients/${client.id}`} className="inline-flex items-center gap-1 text-xs font-medium text-[#2563eb] hover:text-[#03b5d3] transition">
+                Détails
+                <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              </a>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Empty state */}
-      {filtered.length === 0 && (
-        <div className="glass-panel rounded-xl border border-[#434655]/10 p-12 text-center">
-          <span className="material-symbols-outlined text-5xl text-[#434655]">search_off</span>
-          <p className="mt-4 text-lg font-medium text-white">Aucun client trouvé</p>
-          <p className="mt-1 text-sm text-[#c3c6d7]">
-            Essayez de modifier votre recherche
-          </p>
-        </div>
-      )}
     </div>
   );
 }

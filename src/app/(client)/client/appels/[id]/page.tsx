@@ -1,329 +1,285 @@
 "use client";
 
+import { formatDate } from "@/lib/format";
 import { useState } from "react";
 
-/* ------------------------------------------------------------------ */
-/*  Mock data                                                         */
-/* ------------------------------------------------------------------ */
+/* ──────────────────────────────────────────────────────────────────────────── */
+/*  Mock data                                                                  */
+/* ──────────────────────────────────────────────────────────────────────────── */
+
 const prospect = {
-  name: "Marie Dupont",
-  phone: "+33 6 12 34 56 78",
-  email: "marie.dupont@email.com",
-  date: "24 mars 2026 - 09:15",
-  source: "Facebook Ads",
-  campaign: "Reno Printemps 2026",
+  id: "PRO-1001",
+  nom: "Pierre Dupont",
+  entreprise: "Nexus Digital",
+  email: "p.dupont@nexus.fr",
+  telephone: "06 12 45 78 90",
+  source: "LinkedIn",
+  createdAt: "2026-03-18",
+  status: "Qualifié",
+  notes: "Intéressé par notre offre premium. Budget prévu Q2 2026.",
 };
 
-const pipelineSteps = [
-  { label: "Qualification du besoin", icon: "fact_check", done: true },
-  { label: "Devis & Financement", icon: "request_quote", done: false },
-  { label: "Documents", icon: "folder_open", done: false },
+const steps = [
+  { label: "Informations", icon: "person", description: "Données du prospect" },
+  { label: "Qualification", icon: "checklist", description: "Critères de qualification" },
+  { label: "Rendez-vous", icon: "event", description: "Planifier un appel" },
+  { label: "Résultat", icon: "flag", description: "Issue de l'appel" },
 ];
 
-const existingFiles = [
-  { name: "piece_identite.pdf", size: "1.2 Mo", date: "22 mars 2026" },
-  { name: "justificatif_domicile.pdf", size: "856 Ko", date: "22 mars 2026" },
+const qualificationQuestions = [
+  { question: "Budget défini ?", options: ["Oui", "En cours", "Non"], selected: 0 },
+  { question: "Décisionnaire identifié ?", options: ["Oui", "Partiellement", "Non"], selected: 0 },
+  { question: "Besoin confirmé ?", options: ["Oui", "En partie", "Non"], selected: 1 },
+  { question: "Calendrier défini ?", options: ["< 1 mois", "1-3 mois", "> 3 mois"], selected: 1 },
 ];
 
-const notes = [
-  {
-    id: 1,
-    author: "Zachari",
-    date: "22 mars 2026 - 14:30",
-    content: "Client très intéressé par une rénovation complète de la salle de bain. Budget estimé autour de 4,000 €.",
-  },
-  {
-    id: 2,
-    author: "Zachari",
-    date: "21 mars 2026 - 10:00",
-    content: "Premier contact. Demande de rappel pour le 22 mars.",
-  },
+const callHistory = [
+  { date: "2026-03-20", duree: "12 min", type: "Appel sortant", resultat: "Qualifié", notes: "Prospect très intéressé. Demande un devis détaillé." },
+  { date: "2026-03-18", duree: "5 min", type: "Appel sortant", resultat: "Rappeler", notes: "Premier contact. En réunion, demande un rappel vendredi." },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  Page                                                              */
-/* ------------------------------------------------------------------ */
+const resultOptions = ["Qualifié - RDV pris", "Qualifié - À rappeler", "Non qualifié", "Pas de réponse", "Numéro invalide"];
+
+/* ──────────────────────────────────────────────────────────────────────────── */
+/*  Page                                                                       */
+/* ──────────────────────────────────────────────────────────────────────────── */
+
 export default function ProspectDetailPage() {
-  const [intention, setIntention] = useState("achat_immediat");
-  const [raison, setRaison] = useState("renovation");
-  const [details, setDetails] = useState(
-    "La cliente souhaite rénover entièrement sa salle de bain et potentiellement la cuisine. Maison de 120m² construite en 1985."
-  );
-  const [devis, setDevis] = useState("4200");
-  const [paymentMode, setPaymentMode] = useState("comptant");
-  const [newNote, setNewNote] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
+  const [selectedResult, setSelectedResult] = useState("");
+  const [callNotes, setCallNotes] = useState("");
 
   return (
     <div className="space-y-8">
-      {/* Back button + Header */}
-      <div>
-        <button className="flex items-center gap-1 text-sm text-[#c3c6d7] hover:text-white transition-colors mb-4">
-          <span className="material-symbols-outlined text-lg">arrow_back</span>
-          Retour aux appels
-        </button>
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-sm text-[#c3c6d7]">
+        <a href="/client/appels" className="hover:text-white transition-colors">Appels</a>
+        <span className="material-symbols-outlined text-xs">chevron_right</span>
+        <span className="text-white font-medium">{prospect.nom}</span>
+      </div>
 
-        <div className="glass-panel rounded-xl border border-[#434655]/10 p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#2563eb] to-[#03b5d3] text-white text-xl font-bold">
-                MD
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">{prospect.name}</h1>
-                <div className="flex flex-wrap items-center gap-3 mt-1">
-                  <span className="text-sm text-[#c3c6d7] flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">phone</span>
-                    {prospect.phone}
-                  </span>
-                  <span className="text-sm text-[#c3c6d7] flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">schedule</span>
-                    {prospect.date}
-                  </span>
-                </div>
-              </div>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-start gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-brand text-white text-lg font-bold shrink-0">PD</div>
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-plus-jakarta-sans)]">{prospect.nom}</h1>
+              <span className="inline-flex items-center rounded-full bg-[#152032] px-2.5 py-0.5 text-xs font-medium text-[#c3c6d7] border border-[#434655]/20">{prospect.id}</span>
+              <span className="inline-flex items-center rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-xs font-semibold text-cyan-400">{prospect.status}</span>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center rounded-full bg-[#2563eb]/20 px-3 py-1 text-xs font-semibold text-[#2563eb]">
-                <span className="material-symbols-outlined text-sm mr-1">campaign</span>
-                {prospect.source}
+            <div className="flex flex-wrap items-center gap-4 text-sm text-[#c3c6d7]">
+              <span className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-base">business</span>
+                {prospect.entreprise}
               </span>
-              <span className="inline-flex items-center rounded-full bg-[#03b5d3]/20 px-3 py-1 text-xs font-semibold text-[#03b5d3]">
-                <span className="material-symbols-outlined text-sm mr-1">ads_click</span>
-                {prospect.campaign}
+              <span className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-base">mail</span>
+                {prospect.email}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-base">phone</span>
+                {prospect.telephone}
               </span>
             </div>
           </div>
+        </div>
+        <button className="inline-flex items-center gap-2 rounded-lg bg-gradient-brand px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#2563eb]/25">
+          <span className="material-symbols-outlined text-base">call</span>
+          Appeler maintenant
+        </button>
+      </div>
+
+      {/* Stepper */}
+      <div className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
+        <div className="flex items-center justify-between mb-8">
+          {steps.map((step, i) => (
+            <div key={step.label} className="flex items-center flex-1">
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={() => setCurrentStep(i)}
+                  className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition ${
+                    i <= currentStep
+                      ? "bg-[#2563eb] border-[#2563eb] text-white shadow-lg shadow-[#2563eb]/25"
+                      : "border-[#434655]/30 text-[#c3c6d7] hover:border-[#2563eb]/50"
+                  }`}
+                >
+                  {i < currentStep ? (
+                    <span className="material-symbols-outlined text-lg">check</span>
+                  ) : (
+                    <span className="material-symbols-outlined text-lg">{step.icon}</span>
+                  )}
+                </button>
+                <p className={`mt-2 text-xs font-medium ${i <= currentStep ? "text-white" : "text-[#c3c6d7]"}`}>{step.label}</p>
+                <p className="text-[10px] text-[#c3c6d7]">{step.description}</p>
+              </div>
+              {i < steps.length - 1 && (
+                <div className={`flex-1 h-0.5 mx-4 mt-[-24px] ${i < currentStep ? "bg-[#2563eb]" : "bg-[#434655]/30"}`} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Step 0: Informations */}
+        {currentStep === 0 && (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {[
+              { label: "Nom complet", value: prospect.nom, icon: "person" },
+              { label: "Entreprise", value: prospect.entreprise, icon: "business" },
+              { label: "Email", value: prospect.email, icon: "mail" },
+              { label: "Téléphone", value: prospect.telephone, icon: "phone" },
+              { label: "Source", value: prospect.source, icon: "campaign" },
+              { label: "Date de création", value: formatDate(prospect.createdAt), icon: "calendar_today" },
+            ].map((field) => (
+              <div key={field.label} className="rounded-lg bg-[#152032]/40 border border-[#434655]/10 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="material-symbols-outlined text-base text-[#2563eb]">{field.icon}</span>
+                  <span className="text-xs font-medium text-[#c3c6d7]">{field.label}</span>
+                </div>
+                <p className="text-sm font-semibold text-white">{field.value}</p>
+              </div>
+            ))}
+            <div className="sm:col-span-2 rounded-lg bg-[#152032]/40 border border-[#434655]/10 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="material-symbols-outlined text-base text-[#2563eb]">notes</span>
+                <span className="text-xs font-medium text-[#c3c6d7]">Notes</span>
+              </div>
+              <p className="text-sm text-white">{prospect.notes}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Step 1: Qualification */}
+        {currentStep === 1 && (
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-white mb-4">Grille de qualification BANT</h3>
+            {qualificationQuestions.map((q) => (
+              <div key={q.question} className="rounded-lg bg-[#152032]/40 border border-[#434655]/10 p-4">
+                <p className="text-sm font-medium text-white mb-3">{q.question}</p>
+                <div className="flex items-center gap-2">
+                  {q.options.map((opt, oi) => (
+                    <button
+                      key={opt}
+                      className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                        q.selected === oi
+                          ? "bg-[#2563eb] text-white shadow-lg shadow-[#2563eb]/25"
+                          : "bg-[#202a3d] text-[#c3c6d7] border border-[#434655]/20 hover:text-white"
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Step 2: Rendez-vous */}
+        {currentStep === 2 && (
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="block text-xs font-medium text-[#c3c6d7] mb-2">Date du rendez-vous</label>
+                <input type="date" defaultValue="2026-03-25" className="w-full rounded-lg bg-[#152032]/60 border border-[#434655]/20 px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[#c3c6d7] mb-2">Heure</label>
+                <input type="time" defaultValue="14:30" className="w-full rounded-lg bg-[#152032]/60 border border-[#434655]/20 px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[#c3c6d7] mb-2">Notes pour l&apos;appel</label>
+              <textarea
+                rows={4}
+                placeholder="Points à aborder lors de l'appel..."
+                className="w-full rounded-lg bg-[#152032]/60 border border-[#434655]/20 px-4 py-2.5 text-sm text-white placeholder-[#c3c6d7]/50 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50 resize-none"
+                defaultValue="Présenter l'offre premium. Vérifier le budget Q2. Proposer une démo."
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Résultat */}
+        {currentStep === 3 && (
+          <div className="space-y-5">
+            <div>
+              <label className="block text-xs font-medium text-[#c3c6d7] mb-3">Résultat de l&apos;appel</label>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {resultOptions.map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => setSelectedResult(opt)}
+                    className={`rounded-lg px-4 py-3 text-sm font-medium text-left transition ${
+                      selectedResult === opt
+                        ? "bg-[#2563eb] text-white shadow-lg shadow-[#2563eb]/25"
+                        : "bg-[#152032]/60 text-[#c3c6d7] border border-[#434655]/20 hover:text-white"
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[#c3c6d7] mb-2">Notes de l&apos;appel</label>
+              <textarea
+                rows={4}
+                placeholder="Résumé de l'échange..."
+                value={callNotes}
+                onChange={(e) => setCallNotes(e.target.value)}
+                className="w-full rounded-lg bg-[#152032]/60 border border-[#434655]/20 px-4 py-2.5 text-sm text-white placeholder-[#c3c6d7]/50 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/50 resize-none"
+              />
+            </div>
+            <button className="inline-flex items-center gap-2 rounded-lg bg-gradient-brand px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#2563eb]/25">
+              <span className="material-symbols-outlined text-base">save</span>
+              Enregistrer le résultat
+            </button>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div className="flex items-center justify-between mt-8 pt-5 border-t border-[#434655]/10">
+          <button
+            onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+            disabled={currentStep === 0}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#202a3d] border border-[#434655]/20 px-4 py-2 text-sm font-medium text-[#c3c6d7] hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <span className="material-symbols-outlined text-base">arrow_back</span>
+            Précédent
+          </button>
+          <button
+            onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
+            disabled={currentStep === steps.length - 1}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#2563eb] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#2563eb]/25 transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Suivant
+            <span className="material-symbols-outlined text-base">arrow_forward</span>
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Pipeline + Forms */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Pipeline Stepper */}
-          <div className="glass-panel rounded-xl border border-[#434655]/10 p-6">
-            <h2 className="text-lg font-semibold text-white mb-6">Pipeline</h2>
-            <div className="space-y-0">
-              {pipelineSteps.map((step, i) => (
-                <div key={step.label} className="flex gap-4">
-                  {/* Vertical line + circle */}
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                        step.done
-                          ? "border-[#03b5d3] bg-[#03b5d3]/20 text-[#03b5d3]"
-                          : "border-[#434655]/30 bg-[#152032] text-[#c3c6d7]"
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-xl">
-                        {step.done ? "check_circle" : step.icon}
-                      </span>
-                    </div>
-                    {i < pipelineSteps.length - 1 && (
-                      <div
-                        className={`w-0.5 h-10 ${
-                          step.done ? "bg-[#03b5d3]/40" : "bg-[#434655]/20"
-                        }`}
-                      />
-                    )}
+      {/* Call History */}
+      <div className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
+        <h2 className="text-lg font-semibold text-white font-[family-name:var(--font-plus-jakarta-sans)] mb-5">Historique des appels</h2>
+        <div className="space-y-3">
+          {callHistory.map((call, i) => (
+            <div key={i} className="rounded-lg bg-[#152032]/40 border border-[#434655]/10 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#2563eb]/20 text-[#2563eb]">
+                    <span className="material-symbols-outlined text-base">call</span>
                   </div>
-                  {/* Content */}
-                  <div className="pb-6">
-                    <p
-                      className={`text-sm font-semibold ${
-                        step.done ? "text-[#03b5d3]" : "text-[#c3c6d7]"
-                      }`}
-                    >
-                      {step.label}
-                    </p>
+                  <div>
+                    <p className="text-sm font-medium text-white">{call.type}</p>
+                    <p className="text-xs text-[#c3c6d7]">{formatDate(call.date)} &middot; {call.duree}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Qualification Form */}
-          <div className="glass-panel rounded-xl border border-[#434655]/10 p-6 space-y-5">
-            <h2 className="text-lg font-semibold text-white">Qualification du besoin</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-medium text-[#c3c6d7] mb-1.5">
-                  Intention d&apos;achat
-                </label>
-                <select
-                  value={intention}
-                  onChange={(e) => setIntention(e.target.value)}
-                  className="w-full rounded-lg border border-[#434655]/20 bg-[#152032] px-4 py-2.5 text-sm text-white outline-none focus:border-[#2563eb] transition-colors"
-                >
-                  <option value="achat_immediat">Achat immédiat</option>
-                  <option value="reflexion">En réflexion</option>
-                  <option value="comparaison">Comparaison de prix</option>
-                  <option value="information">Demande d&apos;information</option>
-                </select>
+                <span className="inline-flex items-center rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-xs font-semibold text-cyan-400">{call.resultat}</span>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#c3c6d7] mb-1.5">
-                  Raison du projet
-                </label>
-                <select
-                  value={raison}
-                  onChange={(e) => setRaison(e.target.value)}
-                  className="w-full rounded-lg border border-[#434655]/20 bg-[#152032] px-4 py-2.5 text-sm text-white outline-none focus:border-[#2563eb] transition-colors"
-                >
-                  <option value="renovation">Rénovation</option>
-                  <option value="construction">Construction neuve</option>
-                  <option value="agrandissement">Agrandissement</option>
-                  <option value="remplacement">Remplacement équipement</option>
-                </select>
-              </div>
+              <p className="text-sm text-[#c3c6d7] ml-12">{call.notes}</p>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[#c3c6d7] mb-1.5">Détails</label>
-              <textarea
-                value={details}
-                onChange={(e) => setDetails(e.target.value)}
-                rows={4}
-                className="w-full rounded-lg border border-[#434655]/20 bg-[#152032] px-4 py-2.5 text-sm text-white outline-none focus:border-[#2563eb] transition-colors resize-none"
-              />
-            </div>
-          </div>
-
-          {/* Devis & Financement */}
-          <div className="glass-panel rounded-xl border border-[#434655]/10 p-6 space-y-5">
-            <h2 className="text-lg font-semibold text-white">Devis & Financement</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-medium text-[#c3c6d7] mb-1.5">
-                  Montant du devis (€)
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={devis}
-                    onChange={(e) => setDevis(e.target.value)}
-                    className="w-full rounded-lg border border-[#434655]/20 bg-[#152032] px-4 py-2.5 text-sm text-white outline-none focus:border-[#2563eb] transition-colors pr-10"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#c3c6d7] text-sm">
-                    €
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#c3c6d7] mb-1.5">
-                  Mode de paiement
-                </label>
-                <select
-                  value={paymentMode}
-                  onChange={(e) => setPaymentMode(e.target.value)}
-                  className="w-full rounded-lg border border-[#434655]/20 bg-[#152032] px-4 py-2.5 text-sm text-white outline-none focus:border-[#2563eb] transition-colors"
-                >
-                  <option value="comptant">Comptant</option>
-                  <option value="financement">Financement</option>
-                  <option value="echeances">Paiement en échéances</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Documents */}
-          <div className="glass-panel rounded-xl border border-[#434655]/10 p-6 space-y-5">
-            <h2 className="text-lg font-semibold text-white">Documents</h2>
-
-            {/* Upload area */}
-            <div className="border-2 border-dashed border-[#434655]/30 rounded-xl p-8 text-center hover:border-[#2563eb]/40 transition-colors cursor-pointer">
-              <span className="material-symbols-outlined text-4xl text-[#434655]">cloud_upload</span>
-              <p className="mt-2 text-sm text-[#c3c6d7]">
-                Glissez vos fichiers ici ou{" "}
-                <span className="text-[#2563eb] font-medium">parcourir</span>
-              </p>
-              <p className="mt-1 text-xs text-[#434655]">PDF, JPG, PNG - Max 10 Mo</p>
-            </div>
-
-            {/* Existing files */}
-            <div className="space-y-3">
-              {existingFiles.map((file) => (
-                <div
-                  key={file.name}
-                  className="flex items-center justify-between rounded-lg bg-[#152032] px-4 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-[#2563eb]">description</span>
-                    <div>
-                      <p className="text-sm font-medium text-white">{file.name}</p>
-                      <p className="text-xs text-[#c3c6d7]">
-                        {file.size} - {file.date}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[#202a3d] text-[#c3c6d7] hover:text-white transition-colors">
-                      <span className="material-symbols-outlined text-lg">download</span>
-                    </button>
-                    <button className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-red-500/10 text-[#c3c6d7] hover:text-red-400 transition-colors">
-                      <span className="material-symbols-outlined text-lg">delete</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column - Notes */}
-        <div className="space-y-6">
-          <div className="glass-panel rounded-xl border border-[#434655]/10 p-6">
-            <h2 className="text-lg font-semibold text-white mb-4">Notes</h2>
-
-            {/* Add note */}
-            <div className="mb-5">
-              <textarea
-                value={newNote}
-                onChange={(e) => setNewNote(e.target.value)}
-                placeholder="Ajouter une note..."
-                rows={3}
-                className="w-full rounded-lg border border-[#434655]/20 bg-[#152032] px-4 py-2.5 text-sm text-white outline-none focus:border-[#2563eb] transition-colors resize-none placeholder:text-[#434655]"
-              />
-              <button className="mt-2 w-full rounded-lg bg-[#2563eb] px-4 py-2 text-sm font-medium text-white hover:bg-[#2563eb]/80 transition-colors">
-                Ajouter
-              </button>
-            </div>
-
-            {/* Existing notes */}
-            <div className="space-y-4">
-              {notes.map((note) => (
-                <div
-                  key={note.id}
-                  className="rounded-lg bg-[#152032] p-4 border-l-2 border-[#2563eb]"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-[#2563eb]">{note.author}</span>
-                    <span className="text-xs text-[#434655]">{note.date}</span>
-                  </div>
-                  <p className="text-sm text-[#c3c6d7] leading-relaxed">{note.content}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Action buttons */}
-          <div className="space-y-3">
-            <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2563eb] to-[#03b5d3] px-4 py-3 text-sm font-semibold text-white hover:shadow-lg hover:shadow-[#2563eb]/20 transition-all">
-              <span className="material-symbols-outlined text-lg">save</span>
-              Enregistrer
-            </button>
-            <button className="w-full flex items-center justify-center gap-2 rounded-xl glass-card border border-[#434655]/10 px-4 py-3 text-sm font-medium text-[#c3c6d7] hover:text-white hover:border-[#434655]/30 transition-all">
-              <span className="material-symbols-outlined text-lg">cancel</span>
-              Annuler
-            </button>
-            <button className="w-full flex items-center justify-center gap-2 rounded-xl glass-card border border-red-500/20 px-4 py-3 text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all">
-              <span className="material-symbols-outlined text-lg">archive</span>
-              Archiver
-            </button>
-          </div>
+          ))}
         </div>
       </div>
     </div>

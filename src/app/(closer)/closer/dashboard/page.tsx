@@ -1,252 +1,165 @@
 "use client";
 
-/* ------------------------------------------------------------------ */
-/*  Mock data                                                         */
-/* ------------------------------------------------------------------ */
-const commissionChart = [
-  { month: "Déc", value: 820, height: "32%" },
-  { month: "Jan", value: 1050, height: "42%" },
-  { month: "Fév", value: 1180, height: "47%" },
-  { month: "Mar", value: 1425, height: "57%" },
-  { month: "Avr", value: 980, height: "39%" },
-  { month: "Mai", value: 1320, height: "53%" },
+import { formatCurrency } from "@/lib/format";
+
+/* ──────────────────────────────────────────────────────────────────────────── */
+/*  Mock data                                                                  */
+/* ──────────────────────────────────────────────────────────────────────────── */
+
+const kpis = [
+  { label: "Clients actifs", value: "8", icon: "business", trend: "+2" },
+  { label: "Prospects en cours", value: "34", icon: "people", trend: "+12" },
+  { label: "CA ce mois", value: formatCurrency(42500), icon: "payments", trend: "+18%" },
+  { label: "Commission estimée", value: formatCurrency(4250), icon: "account_balance_wallet", trend: "+18%" },
 ];
 
-type ClientStatus = "ACTIF" | "EN PAUSE" | "NOUVEAU";
+const performanceMonths = [
+  { month: "OCT", ca: 28000 },
+  { month: "NOV", ca: 32000 },
+  { month: "DÉC", ca: 35500 },
+  { month: "JAN", ca: 38000 },
+  { month: "FÉV", ca: 39800 },
+  { month: "MAR", ca: 42500 },
+];
+
+const maxCA = Math.max(...performanceMonths.map((m) => m.ca));
 
 const clients = [
-  { id: 1, name: "Réno Express", appels: 42, ca: "38,500 €", commCelexia: "3,850 €", taPart: "385 €", status: "ACTIF" as ClientStatus },
-  { id: 2, name: "Solaire Plus", appels: 35, ca: "31,200 €", commCelexia: "3,120 €", taPart: "312 €", status: "ACTIF" as ClientStatus },
-  { id: 3, name: "Habitat Vert", appels: 28, ca: "24,800 €", commCelexia: "2,480 €", taPart: "248 €", status: "ACTIF" as ClientStatus },
-  { id: 4, name: "Isol&apos;Pro", appels: 22, ca: "19,500 €", commCelexia: "1,950 €", taPart: "195 €", status: "NOUVEAU" as ClientStatus },
-  { id: 5, name: "Thermo Confort", appels: 18, ca: "16,200 €", commCelexia: "1,620 €", taPart: "162 €", status: "EN PAUSE" as ClientStatus },
-  { id: 6, name: "Clim&apos;Sud", appels: 15, ca: "12,300 €", commCelexia: "1,230 €", taPart: "123 €", status: "ACTIF" as ClientStatus },
+  { id: "CLI-001", name: "TechVision SAS", prospectsActifs: 8, appelsAujourdhui: 3, ca: 68000, taux: 48.2 },
+  { id: "CLI-003", name: "DataFlow Corp", prospectsActifs: 6, appelsAujourdhui: 2, ca: 54000, taux: 52.1 },
+  { id: "CLI-005", name: "CloudNine Solutions", prospectsActifs: 5, appelsAujourdhui: 4, ca: 42000, taux: 44.8 },
+  { id: "CLI-007", name: "PixelForge Studio", prospectsActifs: 4, appelsAujourdhui: 1, ca: 38000, taux: 39.5 },
+  { id: "CLI-009", name: "NeoBank Finance", prospectsActifs: 3, appelsAujourdhui: 0, ca: 31000, taux: 46.3 },
+  { id: "CLI-012", name: "GreenTech Innovations", prospectsActifs: 4, appelsAujourdhui: 2, ca: 28000, taux: 41.7 },
+  { id: "CLI-015", name: "MediSoft Santé", prospectsActifs: 2, appelsAujourdhui: 1, ca: 15000, taux: 37.2 },
+  { id: "CLI-018", name: "EduPrime Formation", prospectsActifs: 2, appelsAujourdhui: 0, ca: 9000, taux: 33.8 },
 ];
 
-const statusColors: Record<ClientStatus, string> = {
-  ACTIF: "bg-emerald-500/20 text-emerald-400",
-  "EN PAUSE": "bg-yellow-500/20 text-yellow-400",
-  NOUVEAU: "bg-[#2563eb]/20 text-[#2563eb]",
-};
+const todayTasks = [
+  { heure: "09:30", type: "Appel", prospect: "Pierre Dupont", client: "TechVision SAS", done: true },
+  { heure: "10:15", type: "Relance", prospect: "Marie Laurent", client: "GreenTech", done: true },
+  { heure: "11:00", type: "Appel", prospect: "Nicolas Blanc", client: "DataFlow Corp", done: false },
+  { heure: "14:00", type: "Démo", prospect: "Isabelle Chevalier", client: "CloudNine", done: false },
+  { heure: "15:30", type: "Relance", prospect: "François Girard", client: "TechVision SAS", done: false },
+  { heure: "16:00", type: "Appel", prospect: "Camille Fabre", client: "GreenTech", done: false },
+];
 
-/* ------------------------------------------------------------------ */
-/*  Page                                                              */
-/* ------------------------------------------------------------------ */
+/* ──────────────────────────────────────────────────────────────────────────── */
+/*  Page                                                                       */
+/* ──────────────────────────────────────────────────────────────────────────── */
+
 export default function CloserDashboardPage() {
-  const currentMonthIndex = 3; // March
-
   return (
     <div className="space-y-8">
-      {/* Title */}
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">
-          <span className="text-gradient">Mon espace Closer</span>
-        </h1>
-        <p className="mt-1 text-[#c3c6d7]">Vue d&apos;ensemble de vos performances commerciales</p>
+        <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-plus-jakarta-sans)]">Tableau de bord</h1>
+        <p className="text-sm text-[#c3c6d7] mt-1">Bienvenue Julien ! Voici votre résumé du jour.</p>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Clients apportés */}
-        <div className="glass-card rounded-xl border border-[#434655]/10 p-6">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-[#c3c6d7]">Clients apportés</p>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#152032] text-[#2563eb]">
-              <span className="material-symbols-outlined">group_add</span>
-            </div>
-          </div>
-          <p className="mt-3 text-3xl font-bold text-white">24</p>
-          <div className="mt-1 flex items-center gap-2">
-            <span className="text-sm font-medium text-emerald-400">+12%</span>
-            <span className="text-xs text-[#c3c6d7]">vs mois dernier</span>
-          </div>
-        </div>
-
-        {/* CA généré */}
-        <div className="glass-card rounded-xl border border-[#434655]/10 p-6">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-[#c3c6d7]">CA généré ce mois</p>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#152032] text-emerald-400">
-              <span className="material-symbols-outlined">trending_up</span>
-            </div>
-          </div>
-          <p className="mt-3 text-3xl font-bold text-white">142,500 €</p>
-        </div>
-
-        {/* Commission - gradient card */}
-        <div className="bg-gradient-brand rounded-xl p-6 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Ccircle%20cx%3D%222%22%20cy%3D%222%22%20r%3D%221%22%20fill%3D%22rgba(255%2C255%2C255%2C0.06)%22%2F%3E%3C%2Fsvg%3E')] bg-[length:40px_40px]" />
-          <div className="relative">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-white/80">Ma commission</p>
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-white">
-                <span className="material-symbols-outlined">euro</span>
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {kpis.map((k) => (
+          <div key={k.label} className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-[#c3c6d7]">{k.label}</p>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#152032] text-[#2563eb]">
+                <span className="material-symbols-outlined text-lg">{k.icon}</span>
               </div>
             </div>
-            <p className="mt-3 text-3xl font-bold text-white">1,425 €</p>
-            <p className="mt-1 text-xs text-white/70">
-              <span className="inline-block rounded bg-white/15 px-1.5 py-0.5 text-white text-[10px] font-semibold uppercase">
-                10% Celexia
-              </span>
-            </p>
+            <p className="text-2xl font-bold text-white">{k.value}</p>
+            <div className="mt-2 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-base text-emerald-400">trending_up</span>
+              <span className="text-sm font-medium bg-gradient-to-r from-emerald-400 to-[#03b5d3] bg-clip-text text-transparent">{k.trend}</span>
+              <span className="text-xs text-[#c3c6d7]">ce mois</span>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* Chart + Objectives Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Commission Evolution Chart */}
-        <div className="lg:col-span-2 glass-panel rounded-xl border border-[#434655]/10 p-6">
-          <h2 className="text-lg font-semibold text-white mb-6">
-            <span className="material-symbols-outlined text-[#2563eb] mr-2 align-middle">bar_chart</span>
-            Évolution des commissions
-          </h2>
-          <div className="flex items-end justify-between gap-4 h-52">
-            {commissionChart.map((bar, i) => (
-              <div key={bar.month} className="flex-1 flex flex-col items-center gap-2">
-                <span className="text-xs font-bold text-white">{bar.value} €</span>
-                <div className="w-full relative" style={{ height: "180px" }}>
+      {/* Chart + Today Tasks */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-semibold text-white font-[family-name:var(--font-plus-jakarta-sans)]">Évolution du CA</h2>
+              <p className="text-sm text-[#c3c6d7]">6 derniers mois</p>
+            </div>
+          </div>
+          <div className="flex items-end gap-4 h-48">
+            {performanceMonths.map((m) => (
+              <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
+                <span className="text-xs font-mono text-[#c3c6d7]">{formatCurrency(m.ca)}</span>
+                <div className="w-full flex items-end justify-center h-32">
                   <div
-                    className={`absolute bottom-0 w-full rounded-t-lg transition-all duration-500 ${
-                      i === currentMonthIndex
-                        ? "bg-gradient-to-t from-[#2563eb] to-[#03b5d3] shadow-lg shadow-[#2563eb]/30"
-                        : "bg-[#2563eb]/30 hover:bg-[#2563eb]/50"
-                    }`}
-                    style={{ height: bar.height }}
+                    className="w-8 rounded-t-md bg-gradient-to-t from-[#2563eb] to-[#03b5d3] transition-all duration-500"
+                    style={{ height: `${(m.ca / maxCA) * 100}%` }}
                   />
                 </div>
-                <span
-                  className={`text-xs font-medium ${
-                    i === currentMonthIndex ? "text-[#03b5d3] font-bold" : "text-[#c3c6d7]"
-                  }`}
-                >
-                  {bar.month}
-                </span>
+                <span className="text-xs font-semibold text-[#c3c6d7] mt-1">{m.month}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Objectives Sidebar */}
-        <div className="space-y-6">
-          {/* Quota Clients */}
-          <div className="glass-panel rounded-xl border border-[#434655]/10 p-6">
-            <h3 className="text-sm font-semibold text-white mb-4">Objectifs</h3>
-
-            <div className="space-y-5">
-              {/* Quota */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-[#c3c6d7]">Quota Clients</span>
-                  <span className="text-xs font-bold text-white">24 / 30</span>
+        <div className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
+          <h2 className="text-lg font-semibold text-white font-[family-name:var(--font-plus-jakarta-sans)] mb-4">Aujourd&apos;hui</h2>
+          <p className="text-xs text-[#c3c6d7] mb-4">{todayTasks.filter((t) => t.done).length}/{todayTasks.length} tâches complétées</p>
+          <div className="space-y-2">
+            {todayTasks.map((task, i) => (
+              <div key={i} className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition ${task.done ? "bg-[#152032]/30 opacity-60" : "bg-[#152032]/60"}`}>
+                <div className={`flex h-7 w-7 items-center justify-center rounded-full shrink-0 ${task.done ? "bg-emerald-500/20 text-emerald-400" : "bg-[#2563eb]/20 text-[#2563eb]"}`}>
+                  <span className="material-symbols-outlined text-sm">{task.done ? "check" : "schedule"}</span>
                 </div>
-                <div className="h-2.5 rounded-full bg-[#152032] overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[#2563eb] transition-all duration-700"
-                    style={{ width: "80%" }}
-                  />
+                <div className="flex-1 min-w-0">
+                  <p className={`text-xs font-medium truncate ${task.done ? "text-[#c3c6d7] line-through" : "text-white"}`}>{task.type} - {task.prospect}</p>
+                  <p className="text-[10px] text-[#c3c6d7]">{task.heure} &middot; {task.client}</p>
                 </div>
-                <p className="mt-1 text-[10px] text-[#c3c6d7]">80%</p>
               </div>
-
-              {/* CA Cible */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-[#c3c6d7]">CA Cible</span>
-                  <span className="text-xs font-bold text-white">142k / 150k</span>
-                </div>
-                <div className="h-2.5 rounded-full bg-[#152032] overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-[#2563eb] to-[#03b5d3] transition-all duration-700"
-                    style={{ width: "94%" }}
-                  />
-                </div>
-                <p className="mt-1 text-[10px] text-[#c3c6d7]">94%</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Bonus Level Card */}
-          <div className="glass-panel rounded-xl border border-[#434655]/10 p-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-[#2563eb]/20 to-transparent rounded-bl-full" />
-            <div className="relative">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="material-symbols-outlined text-yellow-400">workspace_premium</span>
-                <span className="text-sm font-semibold text-white">Prochain palier</span>
-              </div>
-              <p className="text-sm text-[#c3c6d7] leading-relaxed">
-                Atteignez{" "}
-                <span className="font-bold text-white">160,000 €</span>{" "}
-                pour passer à{" "}
-                <span className="font-bold text-[#03b5d3]">12%</span> de commission
-              </p>
-              <div className="mt-3 h-2 rounded-full bg-[#152032] overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 transition-all duration-700"
-                  style={{ width: "89%" }}
-                />
-              </div>
-              <p className="mt-1.5 text-xs text-[#c3c6d7]">
-                142,500 € / 160,000 € <span className="text-yellow-400 font-semibold">(89%)</span>
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Clients Table */}
-      <div className="glass-panel rounded-xl border border-[#434655]/10 overflow-hidden">
-        <div className="p-6 border-b border-[#434655]/10">
-          <h2 className="text-lg font-semibold text-white">
-            <span className="material-symbols-outlined text-[#03b5d3] mr-2 align-middle">people</span>
-            Mes clients
-          </h2>
+      <div className="rounded-xl bg-[#202a3d]/60 backdrop-blur-xl border border-[#434655]/10 p-6 shadow-lg">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="text-lg font-semibold text-white font-[family-name:var(--font-plus-jakarta-sans)]">Mes clients</h2>
+            <p className="text-sm text-[#c3c6d7]">Vue d&apos;ensemble de vos clients assignés</p>
+          </div>
+          <a href="/closer/clients" className="inline-flex items-center gap-1 text-sm font-medium text-[#2563eb] hover:text-[#03b5d3] transition">
+            Voir tout
+            <span className="material-symbols-outlined text-base">arrow_forward</span>
+          </a>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#434655]/10">
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#c3c6d7] uppercase tracking-wider">
-                  Nom client
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#c3c6d7] uppercase tracking-wider">
-                  Appels
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#c3c6d7] uppercase tracking-wider">
-                  CA Généré
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#c3c6d7] uppercase tracking-wider">
-                  Comm. Celexia
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#c3c6d7] uppercase tracking-wider">
-                  Ta part (10%)
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#c3c6d7] uppercase tracking-wider">
-                  Statut
-                </th>
+              <tr className="border-b border-[#434655]/15">
+                <th className="text-left py-3 px-4 text-xs font-semibold text-[#c3c6d7] uppercase tracking-wider">Client</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-[#c3c6d7] uppercase tracking-wider">Prospects actifs</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-[#c3c6d7] uppercase tracking-wider">Appels aujourd&apos;hui</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-[#c3c6d7] uppercase tracking-wider">CA généré</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-[#c3c6d7] uppercase tracking-wider">Taux conv.</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#434655]/10">
-              {clients.map((client) => (
-                <tr key={client.id} className="hover:bg-[#202a3d]/40 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#2563eb]/20 text-[#2563eb] text-xs font-bold">
-                        {client.name.substring(0, 2).toUpperCase()}
-                      </div>
-                      <span className="text-sm font-medium text-white">{client.name}</span>
+            <tbody>
+              {clients.map((c) => (
+                <tr key={c.id} className="border-b border-[#434655]/10 hover:bg-[#152032]/30 transition cursor-pointer">
+                  <td className="py-3 px-4">
+                    <div>
+                      <p className="text-sm font-medium text-white">{c.name}</p>
+                      <p className="text-xs text-[#c3c6d7]">{c.id}</p>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-[#c3c6d7]">{client.appels}</td>
-                  <td className="px-6 py-4 text-sm font-semibold text-white">{client.ca}</td>
-                  <td className="px-6 py-4 text-sm text-[#c3c6d7]">{client.commCelexia}</td>
-                  <td className="px-6 py-4 text-sm font-semibold text-[#03b5d3]">{client.taPart}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColors[client.status]}`}
-                    >
-                      {client.status}
-                    </span>
+                  <td className="py-3 px-4 text-sm text-[#c3c6d7]">{c.prospectsActifs}</td>
+                  <td className="py-3 px-4">
+                    <span className={`text-sm font-semibold ${c.appelsAujourdhui > 0 ? "text-[#03b5d3]" : "text-[#c3c6d7]"}`}>{c.appelsAujourdhui}</span>
+                  </td>
+                  <td className="py-3 px-4 text-sm font-semibold text-white">{formatCurrency(c.ca)}</td>
+                  <td className="py-3 px-4">
+                    <span className={`text-sm font-semibold ${c.taux >= 45 ? "text-emerald-400" : c.taux >= 38 ? "text-amber-400" : "text-red-400"}`}>{c.taux}%</span>
                   </td>
                 </tr>
               ))}
