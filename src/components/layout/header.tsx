@@ -1,31 +1,11 @@
 "use client";
 
 import { Bell, Search } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
-function getInitials(name?: string | null): string {
-  if (!name) return "U";
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-const ROLE_LABELS: Record<string, string> = {
-  AGENCE: "Agence",
-  CLIENT: "Client",
-  CLOSER: "Closer",
-};
-
 export function Header() {
-  const { data: session } = useSession();
-  const user = session?.user;
-
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-[#434655]/15 bg-[#081325]/80 backdrop-blur-xl px-6">
       {/* Search */}
@@ -49,17 +29,14 @@ export function Header() {
         {/* User */}
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? "User"} />
-            <AvatarFallback className="text-xs">
-              {getInitials(user?.name)}
-            </AvatarFallback>
+            <AvatarFallback className="text-xs">AC</AvatarFallback>
           </Avatar>
           <div className="hidden flex-col md:flex">
             <span className="text-sm font-medium text-white leading-tight">
-              {user?.name ?? "Utilisateur"}
+              Admin Celexia
             </span>
             <span className="text-xs text-[#c3c6d7]">
-              {user?.role ? ROLE_LABELS[user.role] ?? user.role : ""}
+              Super Utilisateur
             </span>
           </div>
         </div>

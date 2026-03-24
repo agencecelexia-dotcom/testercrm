@@ -1,4 +1,5 @@
-import type { ProspectStatus, InvoiceStatus } from "@prisma/client";
+type ProspectStatus = 'A_TRAITER' | 'NON_QUALIFIE' | 'QUALIFIE' | 'DEVIS_ENVOYE' | 'DEVIS_ACCEPTE' | 'ACOMPTE_RECU' | 'SOLDE_RECU' | 'TERMINE';
+type InvoiceStatus = 'PENDING' | 'SENT' | 'PAID' | 'OVERDUE';
 import { Badge } from "@/components/ui/badge";
 import {
   PROSPECT_STATUS_LABELS,

@@ -1,4 +1,7 @@
-import type { ProspectStatus, InvoiceStatus, Role } from '@prisma/client'
+// Types defined locally to avoid Prisma runtime dependency
+type ProspectStatus = 'A_TRAITER' | 'NON_QUALIFIE' | 'QUALIFIE' | 'DEVIS_ENVOYE' | 'DEVIS_ACCEPTE' | 'ACOMPTE_RECU' | 'SOLDE_RECU' | 'TERMINE'
+type InvoiceStatus = 'PENDING' | 'SENT' | 'PAID' | 'OVERDUE'
+export type Role = 'AGENCE' | 'CLIENT' | 'CLOSER'
 
 // ---------------------------------------------------------------------------
 // Prospect status labels (French)

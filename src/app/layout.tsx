@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/components/providers/session-provider";
 
 export const metadata: Metadata = {
   title: "Celexia | CRM B2B Premium",
@@ -15,7 +14,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className="dark">
       <body className="font-body antialiased bg-background text-foreground min-h-screen">
-        <AuthProvider>{children}</AuthProvider>
+        {children}
       </body>
     </html>
   );

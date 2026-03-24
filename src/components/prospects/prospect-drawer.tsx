@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ProspectStatus } from "@prisma/client";
+type ProspectStatus = 'A_TRAITER' | 'NON_QUALIFIE' | 'QUALIFIE' | 'DEVIS_ENVOYE' | 'DEVIS_ACCEPTE' | 'ACOMPTE_RECU' | 'SOLDE_RECU' | 'TERMINE';
 
 interface Prospect {
   id: string;

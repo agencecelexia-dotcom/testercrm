@@ -1,18 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-
-const loginSchema = z.object({
-  email: z.string().email("Adresse e-mail invalide"),
-  password: z.string().min(1, "Mot de passe requis"),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
 
 const roles = [
   { value: "AGENCE", label: "Agence" },
@@ -29,40 +18,18 @@ const roleDashboard: Record<string, string> = {
 export default function LoginPage() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<string>("AGENCE");
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-  });
-
-  const onSubmit = async (data: LoginForm) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
-    setError("");
-
-    try {
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError("Identifiants incorrects. Veuillez réessayer.");
-      } else {
-        router.push(roleDashboard[selectedRole] || "/agence/dashboard");
-        router.refresh();
-      }
-    } catch {
-      setError("Une erreur est survenue. Veuillez réessayer.");
-    } finally {
-      setLoading(false);
-    }
+    // Hardcoded demo — just redirect based on role
+    setTimeout(() => {
+      router.push(roleDashboard[selectedRole] || "/agence/dashboard");
+    }, 400);
   };
 
   return (
@@ -98,7 +65,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Role Selector */}
             <div className="space-y-3">
               <label className="block text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
@@ -135,16 +102,14 @@ export default function LoginPage() {
                   mail
                 </span>
                 <input
-                  {...register("email")}
                   type="email"
                   id="email"
-                  placeholder="nom@entreprise.fr"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="test@gmail.com"
                   className="w-full bg-surface-lowest border-0 border-b border-outline-variant/30 py-4 pl-12 pr-4 text-sm text-white focus:ring-0 focus:border-primary focus:border-b-2 transition-all outline-none rounded-t-lg"
                 />
               </div>
-              {errors.email && (
-                <p className="mt-1 text-xs text-error">{errors.email.message}</p>
-              )}
             </div>
 
             {/* Password Field */}
@@ -168,9 +133,10 @@ export default function LoginPage() {
                   lock
                 </span>
                 <input
-                  {...register("password")}
                   type={showPassword ? "text" : "password"}
                   id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="w-full bg-surface-lowest border-0 border-b border-outline-variant/30 py-4 pl-12 pr-12 text-sm text-white focus:ring-0 focus:border-primary focus:border-b-2 transition-all outline-none rounded-t-lg"
                 />
@@ -184,11 +150,6 @@ export default function LoginPage() {
                   </span>
                 </button>
               </div>
-              {errors.password && (
-                <p className="mt-1 text-xs text-error">
-                  {errors.password.message}
-                </p>
-              )}
             </div>
 
             {/* Remember Me */}
@@ -205,13 +166,6 @@ export default function LoginPage() {
                 Rester connecté pendant 30 jours
               </label>
             </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="p-3 rounded-lg bg-error-container/20 border border-error/20">
-                <p className="text-sm text-error">{error}</p>
-              </div>
-            )}
 
             {/* Submit Button */}
             <button
